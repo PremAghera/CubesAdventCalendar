@@ -193,8 +193,17 @@ main {
 
 /* Calendar */
 
-.calendar-wrap {
+/* .calendar-wrap {
 	position: relative;
+} */
+
+.calendar-wrap {
+    display: flex;
+    justify-content: center; /* Centers the grid horizontally */
+    align-items: center; /* Centers it vertically if needed */
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Ensure it fills the viewport */
 }
 
 .js .calendar-wrap {
@@ -205,19 +214,19 @@ main {
 
 .calendar {
 	position: relative;
-	width: 100%;
-	height: 100%;
 	margin: 0 auto;
-	overflow: hidden;
+	/* overflow: hidden; */
 	/* we always want 7 boxes in a row */
 	padding: 3em calc((100vw - (7 * (7vw + 1vw)))/2);
 }
 
 .js .calendar {
-	position: absolute;
-	-webkit-perspective: 1000px;
-	perspective: 1000px;
-	padding: 0 calc((100vw - (7 * (7vw + 1vw)))/2) 5em;
+    position: absolute;
+    -webkit-perspective: 1500px;
+    perspective: 1500px;
+    -webkit-perspective-origin: 50% 55%; /* Centered in the middle */
+    perspective-origin: 50% 55%; /* Centered in the middle */
+    padding: 0 calc((100vw - (7 * (7vw + 1vw))) / 2) 5em;
 }
 
 .no-js .calendar {
@@ -238,7 +247,7 @@ main {
 
 /* Cubes container */
 
-.cubes {
+/* .cubes {
 	display: -webkit-flex;
 	display: -ms-flexbox;
 	display: flex;
@@ -255,8 +264,31 @@ main {
 	height: 100%;
 	-webkit-transform-style: preserve-3d;
 	transform-style: preserve-3d;
+} */
+
+.cubes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6vw, 8vw)); 
+    grid-gap: 3vw;
+    width: 66vw; /* 2/3 of the page */
+    margin: 0 auto;
+	-webkit-transform-style: preserve-3d;
+	transform-style: preserve-3d;
 }
 
+@media screen and (max-width: 768px) {
+    .cubes {
+        display: grid;
+        width: 60vw; /* Make it full width on mobile */
+        grid-template-columns: repeat(auto-fit, minmax(14vw, 1fr)); /* Responsive grid */
+        grid-gap: 4vw; /* Increase spacing for mobile */
+        justify-content: center; /* Ensure grid stays centered */
+    }
+    .cube {
+        width: 18vw;  /* Larger cube size on mobile */
+        height: 18vw;
+    }
+}
 
 /* Single cube */
 
@@ -282,9 +314,9 @@ main {
 
 /* push to the right weekday (we have to push 3 boxes) */
 
-.js .cube:first-child {
+/* .js .cube:first-child {
 	margin-left: calc(((7vw + 1vw) * 3) + 0.5vw);
-}
+} */
 
 .js .cube:not(.cube--inactive) {
 	cursor: pointer;
@@ -375,7 +407,7 @@ main {
 
 /* title that appears on hover */
 
-.title {
+/* .title {
 	font-size: 3.25vw;
 	font-weight: 700;
 	position: absolute;
@@ -385,6 +417,19 @@ main {
 	white-space: nowrap;
 	pointer-events: none;
 	opacity: 0;
+} */
+
+.title {
+    font-size: 3.25vw;
+    font-weight: 700;
+    position: fixed;  /* Fixed to the screen */
+    bottom: -5vw;
+    right: 8vw;
+    margin: 0;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 1;
+    z-index: 999;
 }
 
 
@@ -525,20 +570,20 @@ main {
 }
 
 @media screen and (max-width: 50.75em) {
-	.calendar {
+	/* .calendar {
 		padding: 3em calc((100vw - (7 * (14vw + 1vw)))/2);
 	}
 	.js .calendar {
 		padding: 0 calc((100vw - (7 * (12vw + 1vw)))/2) 5em;
-	}
+	} */
 	.cube {
 		width: 12vw;
 		height: 12vw;
 	}
 	/* push to the right weekday if in big view (we have to push 3 boxes) */
-	.js .cube:first-child {
+	/* .js .cube:first-child {
 		margin-left: calc(((12vw + 1vw) * 3) + 0.5vw);
-	}
+	} */
 	.cube__side--front {
 		-webkit-transform: translateZ(6vw);
 		transform: translateZ(6vw);

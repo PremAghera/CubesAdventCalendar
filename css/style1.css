@@ -1,8 +1,10 @@
 .cube__side,
 .no-js .cube {
-	border: 0.75vw solid #fff;
-	outline: 1px solid #fff;
+	border: 0.5vw solid #ffffff;
 	background: #f0f0f0 url(../img/mandala.png) no-repeat center center;
+	background-size: cover;  /* Ensures image fills the entire face */
+	background-position: center;  /* Centers the image */
+	background-repeat: no-repeat;  /* Prevents tiling */
 }
 
 .cube:not(.cube--inactive):nth-child(2n) .cube__side,
@@ -13,6 +15,11 @@
 .cube:not(.cube--inactive):nth-child(3n) .cube__side,
 .no-js .cube:not(.cube--inactive):nth-child(3n) {
 	background-image: url(../img/mandala3.png);
+}
+
+.cube:not(.cube--inactive):nth-child(4n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(4n) {
+	background-image: url(../img/mandala2.png);
 }
 
 .cube--inactive .cube__side,

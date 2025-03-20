@@ -55,16 +55,14 @@
 		this.number = this.options.number;
 		this.color = this.options.color;
 		this.previewTitle = this.options.previewTitle;
-		this.emoji = this.options.emoji || '🎁'; // Default emoji if not provided
 		this.isActive = !this.options.inactive;
 		this._layout();
 	}
-	
+
 	Day.prototype.options = {
 		number: 0,
 		color: '#f1f1f1',
 		previewTitle: '',
-		emoji: '🎁', // Default emoji
 		inactive: false
 	};
 
@@ -82,16 +80,8 @@
 		*/
 		this.cube = document.createElement('div');
 		this.cube.className = this.isActive ? 'cube' : 'cube cube--inactive';
-		this.cube.innerHTML = `
-        <div class="cube__side cube__side--back"></div>
-        <div class="cube__side cube__side--left"></div>
-        <div class="cube__side cube__side--right"></div>
-        <div class="cube__side cube__side--bottom"></div>
-        <div class="cube__side cube__side--top"></div>
-        <div class="cube__side cube__side--front">
-            <div class="cube__emoji">${this.emoji}</div>
-        </div>`;
-   	    this.currentTransform = {translateZ: 0, rotateX: 0, rotateY: 0};
+		this.cube.innerHTML = '<div class="cube__side cube__side--back"></div><div class="cube__side cube__side--left"></div><div class="cube__side cube__side--right"></div><div class="cube__side cube__side--bottom"></div><div class="cube__side cube__side--top"></div><div class="cube__side cube__side--front"><div class="cube__number">' + (this.number+1) + '</div></div>';
+		this.currentTransform = {translateZ: 0, rotateX: 0, rotateY: 0};
 	};
 
 	Day.prototype._rotate = function(ev) {
@@ -138,7 +128,6 @@
 
 		anime(animationSettings);
 	};
-
 
 	Day.prototype._setContentTitleFx = function(contentTitleEl) {
 		this.titlefx = new TextFx(contentTitleEl);
@@ -192,21 +181,20 @@
 		this.days = [];
 		var self = this;
 		this.calendarDays.forEach(function(d, pos) {
-			// Get the bg color and emoji defined in the data attributes of each division.
+			// Get the bg color defined in the data-bg-color of each division.
 			var day = new Day({
 					number: pos,
 					color: d.getAttribute('data-bg-color') || '#f1f1f1',
 					previewTitle: d.getAttribute('data-title') || '',
-					emoji: d.getAttribute('data-emoji') || '🎁',
 					inactive: d.hasAttribute('data-inactive')
 				}),
 				content = contents[pos];
-		
+
 			if( content !== undefined ) {
 				var contentTitle = contents[pos].querySelector('.content__title');
 				day._setContentTitleFx(contentTitle);
 			}
-		
+
 			self.days.push(day);
 			self.cubes.appendChild(day.cube);
 			self.el.removeChild(d);
@@ -318,17 +306,9 @@
 
 	Calendar.prototype._initDayEvents = function(day) {
 		var self = this;
-		// Load saved revealed cubes
-		let revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
-		var instance = day;
-		if (revealedCubes[instance.number]) {
-		    let savedImage = revealedCubes[instance.number];
-		    instance.cube.querySelectorAll('.cube__side').forEach(side => {
-		        side.style.backgroundImage = `url(${savedImage})`;
-		    });
-		}
-		
+
 		// Day/Cube mouseenter/mouseleave event.
+		var instance = day;
 		if( !isMobile ) {
 			instance.mouseenterFn = function(ev) {
 				if( instance.isRotated || self.isOpen ) {
@@ -360,36 +340,14 @@
 		// Day/Cube click event.
 		instance.clickFn = function(ev) {
 			// If the day is inactive or if the calendar is currently animating then do nothing.
-			if (!instance.isActive || self.isAnimating) {
+			if( !instance.isActive || self.isAnimating ) {
 				return false;
 			}
 			self.isAnimating = true;
 			self.isOpen = true;
 			self.currentDayIdx = instance.number;
-		
-			// Define "revealed" images corresponding to the shadow ones
-			const revealedImages = [
-				'../img/flowers.webp',  // Cube 1 revealed image
-				'../img/mandala2_revealed.png', // Cube 2 revealed image
-				'../img/mandala3_revealed.png', // Cube 3 revealed image
-				'../img/flowers_revealed.webp', // Cube 4 revealed image
-				'../img/mandala5_revealed.png', // Cube 5 revealed image
-				'../img/mandala6_revealed.png'  // Cube 6 revealed image
-			];
-		
-			// Find the revealed image for this cube
-			let revealedImage = revealedImages[self.currentDayIdx % revealedImages.length];
-		
-			// Change background to the revealed version
-			instance.cube.querySelectorAll('.cube__side').forEach(side => {
-				side.style.backgroundImage = `url(${revealedImage})`;
-			});
-			// Store revealed cube in localStorage
-			let revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
-			revealedCubes[self.currentDayIdx] = revealedImage;
-			localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
-		
-			// Hide the main container (same as existing logic)
+
+			// Hide the main container
 			anime({
 				targets: self.el,
 				duration: 1200,
@@ -399,24 +357,26 @@
 					self.isAnimating = false;
 				}
 			});
-		
-			for (var i = 0, totalDays = self.days.length; i < totalDays; ++i) {
-				var day = self.days[i];		
-				if (self.currentDayIdx === i) {
+
+			for(var i = 0, totalDays = self.days.length; i < totalDays; ++i) {
+				var day = self.days[i];
+
+				if( self.currentDayIdx === i ) {
 					anime({
 						targets: day.cube,
 						duration: 600,
 						delay: 200,
 						easing: 'easeInExpo',
 						scale: 1.1,
-						translateY: -window.innerHeight * 2,
+						translateY: -window.innerHeight*2,
 						translateZ: day.currentTransform.translateZ,
 						rotateX: day.currentTransform.rotateX,
 						rotateY: day.currentTransform.rotateY
 					});
-		
+
 					self._showContent(instance);
-				} else {
+				}
+				else {
 					var bcr = day.cube.getBoundingClientRect();
 					anime({
 						targets: day.cube,
@@ -424,14 +384,14 @@
 						easing: 'easeInOutExpo',
 						scale: 0.1,
 						translateX: function(el, index) {
-							return bcr.left + window.pageXOffset <= window.innerWidth / 2 ? anime.random(-800, 0) : anime.random(0, 800);
+							return bcr.left + window.pageXOffset <= window.innerWidth/2 ? anime.random(-800,0) : anime.random(0,800);
 						},
 						translateY: function(el, index) {
-							return bcr.top + window.pageYOffset <= window.innerHeight / 2 ? anime.random(-1400, -200) : anime.random(-200, 600);
+							return bcr.top + window.pageYOffset <= window.innerHeight/2 ? anime.random(-1400,-200) : anime.random(-200,600);
 						},
 						translateZ: -1500,
 						rotateY: function(el, index) {
-							return bcr.left + window.pageXOffset <= window.innerWidth / 2 ? anime.random(-40, 0) : anime.random(0, 40);
+							return bcr.left + window.pageXOffset <= window.innerWidth/2 ? anime.random(-40,0) : anime.random(0,40);
 						}
 					});
 				}
@@ -712,35 +672,5 @@
 	}
 
 	init();
-
-	// Image upload functionality for details page
-	document.addEventListener('DOMContentLoaded', function() {
-	    var imageInput = document.getElementById('imageUpload');
-	    if (imageInput) {
-	        imageInput.addEventListener('change', function(e) {
-	            var file = e.target.files[0];
-	            if (file) {
-	                var reader = new FileReader();
-	                reader.onload = function(evt) {
-	                    var base64Image = evt.target.result;
-	                    // Save uploaded image in localStorage
-	                    localStorage.setItem('uploadedImage', base64Image);
-	                    // Apply uploaded image to all cube sides
-	                    document.querySelectorAll('.cube__side').forEach(function(side) {
-	                        side.style.backgroundImage = `url(${base64Image})`;
-	                    });
-	                };
-	                reader.readAsDataURL(file);
-	            }
-	        });
-	    }
-	    // On page load, check if an uploaded image exists and apply it to cube sides
-	    var savedImage = localStorage.getItem('uploadedImage');
-	    if (savedImage) {
-	        document.querySelectorAll('.cube__side').forEach(function(side) {
-	            side.style.backgroundImage = `url(${savedImage})`;
-	        });
-	    }
-	});
 
 })(window);
