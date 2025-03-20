@@ -713,34 +713,4 @@
 
 	init();
 
-	// Image upload functionality for details page
-	document.addEventListener('DOMContentLoaded', function() {
-	    var imageInput = document.getElementById('imageUpload');
-	    if (imageInput) {
-	        imageInput.addEventListener('change', function(e) {
-	            var file = e.target.files[0];
-	            if (file) {
-	                var reader = new FileReader();
-	                reader.onload = function(evt) {
-	                    var base64Image = evt.target.result;
-	                    // Save uploaded image in localStorage
-	                    localStorage.setItem('uploadedImage', base64Image);
-	                    // Apply uploaded image to all cube sides
-	                    document.querySelectorAll('.cube__side').forEach(function(side) {
-	                        side.style.backgroundImage = `url(${base64Image})`;
-	                    });
-	                };
-	                reader.readAsDataURL(file);
-	            }
-	        });
-	    }
-	    // On page load, check if an uploaded image exists and apply it to cube sides
-	    var savedImage = localStorage.getItem('uploadedImage');
-	    if (savedImage) {
-	        document.querySelectorAll('.cube__side').forEach(function(side) {
-	            side.style.backgroundImage = `url(${savedImage})`;
-	        });
-	    }
-	});
-
 })(window);

@@ -139,8 +139,6 @@
 						<p class="content__meta">Chuck Palahniuk</p>
 					</div>
 					<div class="content__number">0</div>
-					<label for="imageUpload" class="upload-button">Upload Image</label>
-					<input type="file" id="imageUpload" accept="image/*" style="display: none;">
 					<button class="btn-back" aria-label="Back to the grid view">&crarr;</button>
 				</div><!-- /content -->
 			</div><!-- /calendar-wrap -->
@@ -149,38 +147,5 @@
 		<script src="js/anime.min.js"></script>
 		<script src="js/textfx.js"></script>
 		<script src="js/main.js"></script>
-		<script>
-			const cubes = document.querySelectorAll('.cube');
-			const imageUpload = document.getElementById('imageUpload');
-
-			// Load image from localStorage if available
-			function loadImage() {
-				const storedImage = localStorage.getItem('uploadedImage');
-				if (storedImage) {
-					cubes.forEach(cube => {
-						cube.style.backgroundImage = `url(${storedImage})`;
-					});
-				}
-			}
-
-			// Handle image upload
-			imageUpload.addEventListener('change', function(event) {
-				const file = event.target.files[0];
-				if (file) {
-					const reader = new FileReader();
-					reader.onloadend = function() {
-						const base64Image = reader.result;
-						localStorage.setItem('uploadedImage', base64Image);
-						cubes.forEach(cube => {
-							cube.style.backgroundImage = `url(${base64Image})`;
-						});
-					};
-					reader.readAsDataURL(file);
-				}
-			});
-
-			// Initialize
-			loadImage();
-		</script>
 	</body>
 </html>
