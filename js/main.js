@@ -70,28 +70,28 @@
 
 	// Build the 3D cube element.
 	Day.prototype._layout = function() {
-		/* The Cube structure:
-		<div class="cube">
-			<div class="cube__side cube__side--front"></div>
-			<div class="cube__side cube__side--back"></div>
-			<div class="cube__side cube__side--right"></div>
-			<div class="cube__side cube__side--left"></div>
-			<div class="cube__side cube__side--top"></div>
-			<div class="cube__side cube__side--bottom"></div>
-		</div>
-		*/
 		this.cube = document.createElement('div');
 		this.cube.className = this.isActive ? 'cube' : 'cube cube--inactive';
 		this.cube.innerHTML = `
-        <div class="cube__side cube__side--back"></div>
-        <div class="cube__side cube__side--left"></div>
-        <div class="cube__side cube__side--right"></div>
-        <div class="cube__side cube__side--bottom"></div>
-        <div class="cube__side cube__side--top"></div>
-        <div class="cube__side cube__side--front">
-            <div class="cube__emoji">${this.emoji}</div>
-        </div>`;
-   	    this.currentTransform = {translateZ: 0, rotateX: 0, rotateY: 0};
+			<div class="cube__side cube__side--back"></div>
+			<div class="cube__side cube__side--left"></div>
+			<div class="cube__side cube__side--right"></div>
+			<div class="cube__side cube__side--bottom"></div>
+			<div class="cube__side cube__side--top"></div>
+			<div class="cube__side cube__side--front">
+				<div class="cube__emoji">${this.emoji}</div>
+			</div>`;
+		this.currentTransform = {translateZ: 0, rotateX: 0, rotateY: 0};
+	
+		// 🟡 Position the emoji in the bottom right corner
+		const front = this.cube.querySelector('.cube__side--front');
+		front.style.position = 'relative';
+		const emojiEl = front.querySelector('.cube__emoji');
+		emojiEl.style.position = 'absolute';
+		emojiEl.style.bottom = '30px';
+		emojiEl.style.right = '35px';
+		emojiEl.style.fontSize = '2rem';
+		emojiEl.style.pointerEvents = 'none';
 	};
 
 	Day.prototype._rotate = function(ev) {

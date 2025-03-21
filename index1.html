@@ -43,22 +43,21 @@
 			</header>
 			<div class="calendar-wrap">
 				<div class="calendar">
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Sakura" data-emoji="🌸"></div>
-					<div class="cube" data-bg-color="#F2D9E6" data-title="Temple" data-emoji="⛩️"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Drive" data-emoji="🚘"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Drive1" data-emoji="🚘"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Drive2" data-emoji="🚘"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Sakura" data-emoji="🌸"></div>
-					<div class="cube" data-bg-color="#F2D9E6" data-title="Temple" data-emoji="⛩️"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Drive" data-emoji="🚘"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Drive1" data-emoji="🚘"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Drive2" data-emoji="🚘"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Sakura" data-emoji="🌸"></div>
-					<div class="cube" data-bg-color="#F2D9E6" data-title="Temple" data-emoji="⛩️"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Drive" data-emoji="🚘"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Drive1" data-emoji="🚘"></div>
-					<div class="cube" data-bg-color="#F7E8ED" data-title="Drive2" data-emoji="🚘"></div>
-					<div class="cube" data-inactive data-bg-color="#616161" data-title="Coming soon" data-emoji="🔒"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="it's time" data-emoji="✈️"></div>
+					<div class="cube" data-bg-color="#F2D9E6" data-title="high above" data-emoji="🌇"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="immerse" data-emoji="🎭"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="hanami" data-emoji="🎊"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="the woods" data-emoji="🪵"></div>
+					<div class="cube" data-bg-color="#F2D9E6" data-title="horizons" data-emoji="🌅"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="feast" data-emoji="🍣"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="unwind" data-emoji="🌋"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="warriors" data-emoji="⚔️"></div>
+					<div class="cube" data-bg-color="#F2D9E6" data-title="sakura" data-emoji="🌸"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="torii" data-emoji="⛩️"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="sip" data-emoji="🫖"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="the vibe" data-emoji="🍢"></div>
+					<div class="cube" data-bg-color="#F2D9E6" data-title="nara" data-emoji="🦌"></div>
+					<div class="cube" data-bg-color="#F7E8ED" data-title="Friday 2025" data-emoji="💍"></div>
 				</div>
 				<div class="content">
 					<div class="content__block">
@@ -143,6 +142,31 @@
 				</div><!-- /content -->
 			</div><!-- /calendar-wrap -->
 		</main>
+		<script>
+    (function() {
+      const header = document.querySelector('.codrops-header__title');
+      let tapCount = 0;
+      let firstTapTime = null;
+
+      header.addEventListener('click', () => {
+        const now = Date.now();
+        if (!firstTapTime || now - firstTapTime > 3000) {
+          // Reset if outside 3 seconds
+          tapCount = 1;
+          firstTapTime = now;
+        } else {
+          tapCount++;
+        }
+
+        if (tapCount === 5) {
+          localStorage.clear();
+          alert('Local storage cleared!');
+          tapCount = 0;
+          firstTapTime = null;
+        }
+      });
+    })();
+  </script>
 		<script src="js/charming.min.js"></script>
 		<script src="js/anime.min.js"></script>
 		<script src="js/textfx.js"></script>
