@@ -252,9 +252,11 @@
 				x += 90;
 				y += 90;
 	
-				var movement = { rx: 20, ry: 40 };
+				var movement = { rx: 21, ry: 40 };
 				var rotX = 2 * movement.rx / 180 * x - movement.rx;
-				var rotY = 2 * movement.ry / 180 * y - movement.ry;
+				// var rotY = 2 * movement.ry / 180 * y - movement.ry;
+				// var rotX = movement.rx - (2 * movement.rx / 180 * x);
+				var rotY = movement.ry - (2 * movement.ry / 180 * y);
 	
 				requestAnimationFrame(function() {
 					self.cubes.style.WebkitTransform = self.cubes.style.transform = 
