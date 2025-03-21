@@ -88,9 +88,10 @@
 		front.style.position = 'relative';
 		const emojiEl = front.querySelector('.cube__emoji');
 		emojiEl.style.position = 'absolute';
-		emojiEl.style.bottom = '30px';
-		emojiEl.style.right = '35px';
-		emojiEl.style.fontSize = '2rem';
+		emojiEl.style.left = '50%';
+		emojiEl.style.bottom = '10px'; // consistent baseline
+		emojiEl.style.transform = 'translateX(-50%) translateY(0)';
+		emojiEl.style.fontSize = 'clamp(20px, 4vw, 36px)';
 		emojiEl.style.pointerEvents = 'none';
 	};
 
