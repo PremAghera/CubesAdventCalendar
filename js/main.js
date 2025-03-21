@@ -238,22 +238,30 @@
 				});
 			};
 			
-			this.handleOrientation = function() {
-				if( self.isOpen ) {
-					return false;
-				};
-
-				var y = event.gamma;
-				// To make computation easier we shift the range of x and y to [0,180]
+			this.handleOrientation = function(event) {
+				if (self.isOpen) return false;
+	
+				var x = event.beta;  // front-back tilt [-180,180]
+				var y = event.gamma; // left-right tilt [-90,90]
+	
+				// Clamp values to avoid extreme tilts
+				x = Math.max(-90, Math.min(90, x));
+				y = Math.max(-90, Math.min(90, y));
+	
+				// Normalize to [0,180]
+				x += 90;
 				y += 90;
+	
+				var movement = { rx: 20, ry: 40 };
+				var rotX = 2 * movement.rx / 180 * x - movement.rx;
+				var rotY = 2 * movement.ry / 180 * y - movement.ry;
+	
 				requestAnimationFrame(function() {
-					// Transform values.
-					var movement = {ry:40},
-						rotY = 2*movement.ry / 180 * y - movement.ry;
-
-					self.cubes.style.WebkitTransform = self.cubes.style.transform = 'rotate3d(0,-1,0,' + rotY + 'deg)';
+					self.cubes.style.WebkitTransform = self.cubes.style.transform = 
+						'rotate3d(-1,0,0,' + rotX + 'deg) rotate3d(0,-1,0,' + rotY + 'deg)';
 				});
 			};
+			window._calendarHandleOrientation = this.handleOrientation;
 			if( isMobile ) {
 				window.addEventListener('deviceorientation', this.handleOrientation);
 			}
@@ -704,11 +712,46 @@
 	}
 
 	function layout() {
-		new Calendar(calendarEl);
+		const calendar = new Calendar(calendarEl);
 		// If settings.snow === true then create the canvas element for the snow effect.
 		if( settings.snow ) {
 			var snow = new Snow();
 			bgEl = snow.canvas;
+		}
+
+		// Triple-tap on .codrops-header__title to trigger motion permission
+		let tapCount = 0;
+		let tapTimeout = null;
+		const titleEl = document.querySelector('.codrops-header__title');
+		if (titleEl) {
+			titleEl.addEventListener('click', () => {
+				tapCount++;
+				if (tapTimeout) clearTimeout(tapTimeout);
+				tapTimeout = setTimeout(() => {
+					tapCount = 0;
+				}, 3000); // 3-second window
+
+				if (tapCount >= 3) {
+					if (typeof DeviceOrientationEvent !== 'undefined' &&
+						typeof DeviceOrientationEvent.requestPermission === 'function') {
+						DeviceOrientationEvent.requestPermission()
+							.then(response => {
+					if (response === 'granted') {
+						alert('✅ Motion access granted');
+						window.addEventListener('deviceorientation', window._calendarHandleOrientation);
+					} else {
+						alert('❌ Motion access denied: ' + response);
+					}
+							})
+							.catch(error => {
+								alert('❌ Motion request failed: ' + error);
+							});
+					} else {
+					window.addEventListener('deviceorientation', window._calendarHandleOrientation);
+					}
+					tapCount = 0;
+				}
+			});
 		}
 	}
 
