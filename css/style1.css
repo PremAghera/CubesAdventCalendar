@@ -7,20 +7,77 @@
 	background-repeat: no-repeat;  /* Prevents tiling */
 }
 
+.cube:not(.cube--inactive):nth-child(1n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(1n) {
+	background-image: url(../img/sakura1.webp);
+}
+
 .cube:not(.cube--inactive):nth-child(2n) .cube__side,
 .no-js .cube:not(.cube--inactive):nth-child(2n) {
-	background-image: url(../img/mandala2.png);
+	background-image: url(../img/sakura2.webp);
 }
 
 .cube:not(.cube--inactive):nth-child(3n) .cube__side,
 .no-js .cube:not(.cube--inactive):nth-child(3n) {
-	background-image: url(../img/mandala3.png);
+	background-image: url(../img/sakura3.webp);
 }
 
 .cube:not(.cube--inactive):nth-child(4n) .cube__side,
 .no-js .cube:not(.cube--inactive):nth-child(4n) {
-	background-image: url(../img/mandala2.png);
+	background-image: url(../img/sakura4.webp);
 }
+
+.cube:not(.cube--inactive):nth-child(5n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(5n) {
+	background-image: url(../img/sakura5.webp);
+}
+
+.cube:not(.cube--inactive):nth-child(6n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(6n) {
+	background-image: url(../img/sakura6.webp);
+}
+
+.cube:not(.cube--inactive):nth-child(7n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(7n) {
+	background-image: url(../img/sakura7.webp);
+}
+
+.cube:not(.cube--inactive):nth-child(8n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(8n) {
+	background-image: url(../img/sakura8.webp);
+}
+
+.cube:not(.cube--inactive):nth-child(9n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(9n) {
+	background-image: url(../img/sakura9.webp);
+}
+
+.cube:not(.cube--inactive):nth-child(10n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(10n) {
+	background-image: url(../img/sakura10.webp);
+}
+
+.cube:not(.cube--inactive):nth-child(11n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(11n) {
+	background-image: url(../img/sakura11.webp);
+}
+
+.cube:not(.cube--inactive):nth-child(12n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(12n) {
+	background-image: url(../img/sakura12.webp);
+}
+
+.cube:not(.cube--inactive):nth-child(13n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(13n) {
+	background-image: url(../img/sakura13.webp);
+}
+
+.cube:not(.cube--inactive):nth-child(14n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(14n) {
+	background-image: url(../img/sakura14.webp);
+}
+
+
 
 .cube--inactive .cube__side,
 .no-js .cube--inactive {
