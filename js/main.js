@@ -454,7 +454,6 @@
 					fileInput.value = '';
 				};
 				reader.readAsDataURL(file);
-			
 			};
 
             // Programmatically click the hidden input so the user sees the file picker
