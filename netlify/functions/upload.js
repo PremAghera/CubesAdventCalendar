@@ -1,9 +1,7 @@
 exports.handler = async (event, context) => {
-    const { default: fetch } = await import('node-fetch');
-    const { default: FormData } = await import('form-data');
-  }
+  const { default: fetch } = await import('node-fetch');
+  const { default: FormData } = await import('form-data');
 
-exports.handler = async (event, context) => {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
