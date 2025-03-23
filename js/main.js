@@ -345,38 +345,75 @@
             fileInput.type = 'file';
             fileInput.accept = 'image/*'; // let user pick images from phone/computer
 
-            // When the user picks a file:
             fileInput.onchange = function(e) {
                 var file = e.target.files[0];
                 if (!file) return; // user canceled
 
-                // Read the file as a Data URL
+                // Basic file checks: type and size
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select a valid image file.');
+                    fileInput.value = '';
+                    return;
+                }
+                var MAX_SIZE = 9 * 1024 * 1024; // 5MB limit
+                if (file.size > MAX_SIZE) {
+                    alert('File is too large (max 5MB). Please select a smaller image.');
+                    fileInput.value = '';
+                    return;
+                }
+
                 var reader = new FileReader();
-                reader.onload = function(e) {
-                    var dataURL = e.target.result;
+                reader.onload = function(ev) {
+                    var dataURL = ev.target.result;
 
-                    // Save this new image to localStorage, overwriting if it exists
-                    var revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
-                    revealedCubes[self.currentDayIdx] = dataURL;
-                    localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
+                    // Call your Netlify serverless function to handle the upload
+                    fetch('/.netlify/functions/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageData: dataURL })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Upload failed with status ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.imageUrl) {
+                            // Save the returned Cloudinary URL in localStorage for persistence
+                            var revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
+                            revealedCubes[self.currentDayIdx] = data.imageUrl;
+                            localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
 
-                    // Update the background of the current cube with the new image
-                    currentDay.cube.querySelectorAll('.cube__side').forEach(side => {
-                        side.style.backgroundImage = `url(${dataURL})`;
+                            // Update the background of the current cube with the new image
+                            currentDay.cube.querySelectorAll('.cube__side').forEach(side => {
+                                side.style.backgroundImage = `url(${data.imageUrl})`;
+                            });
+
+                            // Translate the emoji to the bottom right corner if an image exists
+                            var emojiEl = currentDay.cube.querySelector('.cube__emoji');
+                            if (emojiEl) {
+                                emojiEl.style.left = 'unset';
+                                emojiEl.style.right = '10px';
+                                emojiEl.style.top = 'unset';
+                                emojiEl.style.bottom = '5px';
+                                emojiEl.style.transform = 'translateX(0) translateY(0)';
+                                emojiEl.style.fontSize = '16px';
+                                emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
+                            }
+                        } else {
+                            console.error('Upload failed, no imageUrl returned:', data);
+                            alert('Sorry, the upload failed. Please try again.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error uploading image:', err);
+                        alert('An error occurred while uploading. Please try again.');
+                    })
+                    .finally(() => {
+                        // Reset file input so iOS can pick the same file again
+                        fileInput.value = '';
                     });
-					fileInput.value = '';
-					
-                    // Translate the emoji to the bottom right corner if an image exists
-                    var emojiEl = currentDay.cube.querySelector('.cube__emoji');
-                    if (emojiEl) {
-                        emojiEl.style.left = 'unset';
-                        emojiEl.style.right = '10px';
-                        emojiEl.style.top = 'unset';
-                        emojiEl.style.bottom = '5px';
-                        emojiEl.style.transform = 'translateX(0) translateY(0)';
-						emojiEl.style.fontSize = '16px';
-						emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
-                    }
                 };
                 reader.readAsDataURL(file);
             };
