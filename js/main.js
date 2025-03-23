@@ -364,6 +364,8 @@
                     currentDay.cube.querySelectorAll('.cube__side').forEach(side => {
                         side.style.backgroundImage = `url(${dataURL})`;
                     });
+					fileInput.value = '';
+					
                     // Translate the emoji to the bottom right corner if an image exists
                     var emojiEl = currentDay.cube.querySelector('.cube__emoji');
                     if (emojiEl) {
