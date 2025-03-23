@@ -689,10 +689,9 @@
 		this.days.forEach(day => {
 		  const dayNumber = day.number;
 		  // Construct the Cloudinary URL.
-		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/cube_${dayNumber}.webp`;
-		  // Define a local fallback URL (adjust the path and file extension as needed).
-		  const localUrl = `./images/placeholder/cube_${dayNumber}.webp`;
-		  
+		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/f_auto/cube_${dayNumber}`;		  // Define a local fallback URL (adjust the path and file extension as needed).
+		  const localUrl = `./images/placeholder/sakura${dayNumber}.webp`;
+		  		  
 		  // Create an Image object to test if the Cloudinary image exists.
 		  const testImg = new Image();
 		  
@@ -700,17 +699,32 @@
 			// Cloud image exists – update the cube's background.
 			day.cube.querySelectorAll('.cube__side').forEach(side => {
 			  side.style.backgroundImage = `url(${cloudUrl})`;
+			  // Ensure a visible fallback color if needed.
+			  side.style.backgroundColor = '';
 			});
 		  };
 		  
 		  testImg.onerror = function() {
-			// Cloud image failed to load – use the local fallback image.
-			day.cube.querySelectorAll('.cube__side').forEach(side => {
-			  side.style.backgroundImage = `url(${localUrl})`;
-			});
+			console.error('Failed to load Cloudinary image for cube ' + dayNumber + '. Falling back to local image.');
+			// Attempt to load the local fallback image.
+			const fallbackImg = new Image();
+			fallbackImg.onload = function() {
+			  day.cube.querySelectorAll('.cube__side').forEach(side => {
+				side.style.backgroundImage = `url(${localUrl})`;
+				side.style.backgroundColor = '';
+			  });
+			};
+			fallbackImg.onerror = function() {
+			  console.error('Failed to load local fallback for cube ' + dayNumber + '. Using default background color.');
+			  day.cube.querySelectorAll('.cube__side').forEach(side => {
+				side.style.backgroundImage = '';
+				side.style.backgroundColor = '#f1f1f1';
+			  });
+			};
+			fallbackImg.src = localUrl;
 		  };
 		  
-		  // Start loading the image.
+		  // Start loading the Cloudinary image.
 		  testImg.src = cloudUrl;
 		});
 	  };
