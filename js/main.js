@@ -332,6 +332,34 @@
 		backCtrl.addEventListener('click', this.backToCalendarFn);
 		
 		this.uploadCtrlFn = function(ev) {
+
+			// Add this helper function at the beginning of the uploadCtrlFn function:
+			function compressImage(dataURL, quality, maxWidth, maxHeight, callback) {
+				var img = new Image();
+				img.onload = function() {
+					var canvas = document.createElement('canvas');
+					var width = img.width;
+					var height = img.height;
+					// Scale dimensions if they exceed limits
+					if (width > maxWidth) {
+						height = height * (maxWidth / width);
+						width = maxWidth;
+					}
+					if (height > maxHeight) {
+						width = width * (maxHeight / height);
+						height = maxHeight;
+					}
+					canvas.width = width;
+					canvas.height = height;
+					var ctx = canvas.getContext('2d');
+					ctx.drawImage(img, 0, 0, width, height);
+					// Get the compressed image data URL in JPEG format
+					var compressedDataURL = canvas.toDataURL('image/jpeg', quality);
+					callback(compressedDataURL);
+				};
+				img.src = dataURL;
+			}
+
             // Only allow uploads if a cube is actually open (i.e. details page is showing).
             if (!self.isOpen || self.isAnimating) {
                 return false;
@@ -355,103 +383,107 @@
                     fileInput.value = '';
                     return;
                 }
-                var MAX_SIZE = 9 * 1024 * 1024; // 5MB limit
+                var MAX_SIZE = 8 * 1024 * 1024; // 8MB limit
                 if (file.size > MAX_SIZE) {
-                    alert('File is too large (max 5MB). Please select a smaller image.');
+                    alert('File is too large (max 8MB). Please select a smaller image.');
                     fileInput.value = '';
                     return;
                 }
 
                 var reader = new FileReader();
                 reader.onload = function(ev) {
-                    var dataURL = ev.target.result;
+					var originalDataURL = ev.target.result;
+					// Compress the image (quality: 0.6, max dimensions: 1024x1024)
+					compressImage(originalDataURL, 0.6, 1024, 1024, function(compressedDataURL) {
+						var dataURL = compressedDataURL;
 
-					// Create (or get existing) progress bar element
-					var progressContainer = document.getElementById('upload-progress-container');
-					var progressBar;
-					if (!progressContainer) {
-						progressContainer = document.createElement('div');
-						progressContainer.id = 'upload-progress-container';
-						progressContainer.style.position = 'fixed';
-						progressContainer.style.top = '0';
-						progressContainer.style.left = '0';
-						progressContainer.style.width = '100%';
-						progressContainer.style.height = '4px';
-						progressContainer.style.backgroundColor = '#ccc';
-						progressContainer.style.zIndex = '9999';
-						progressContainer.style.display = 'none';
-						progressBar = document.createElement('div');
-						progressBar.id = 'upload-progress-bar';
-						progressBar.style.width = '0%';
-						progressBar.style.height = '100%';
-						progressBar.style.backgroundColor = '#4caf50';
-						progressContainer.appendChild(progressBar);
-						document.body.appendChild(progressContainer);
-					} else {
-						progressBar = document.getElementById('upload-progress-bar');
-					}
-
-					// Show the progress bar
-					progressContainer.style.display = 'block';
-					progressBar.style.width = '0%';
-
-					var xhr = new XMLHttpRequest();
-					xhr.open('POST', '/.netlify/functions/upload');
-					xhr.setRequestHeader('Content-Type', 'application/json');
-					
-					xhr.upload.onprogress = function(event) {
-						if (event.lengthComputable) {
-							var percentComplete = (event.loaded / event.total) * 100;
-							progressBar.style.width = percentComplete + '%';
-						}
-					};
-
-					xhr.onload = function() {
-						// Hide progress bar after a short delay
-						setTimeout(function() {
+						// Create (or get existing) progress bar element
+						var progressContainer = document.getElementById('upload-progress-container');
+						var progressBar;
+						if (!progressContainer) {
+							progressContainer = document.createElement('div');
+							progressContainer.id = 'upload-progress-container';
+							progressContainer.style.position = 'fixed';
+							progressContainer.style.top = '0';
+							progressContainer.style.left = '0';
+							progressContainer.style.width = '100%';
+							progressContainer.style.height = '4px';
+							progressContainer.style.backgroundColor = '#ccc';
+							progressContainer.style.zIndex = '9999';
 							progressContainer.style.display = 'none';
-						}, 500);
-
-						if (xhr.status >= 200 && xhr.status < 300) {
-							var data = JSON.parse(xhr.responseText);
-							if (data.imageUrl) {
-								// Save the returned Cloudinary URL in localStorage for persistence
-								var revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
-								revealedCubes[self.currentDayIdx] = data.imageUrl;
-								localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
-
-								// Update the background of the current cube with the new image
-								currentDay.cube.querySelectorAll('.cube__side').forEach(function(side) {
-									side.style.backgroundImage = `url(${data.imageUrl})`;
-								});
-
-								// Adjust the emoji positioning if an image exists
-								var emojiEl = currentDay.cube.querySelector('.cube__emoji');
-								if (emojiEl) {
-									emojiEl.style.left = 'unset';
-									emojiEl.style.right = '10px';
-									emojiEl.style.top = 'unset';
-									emojiEl.style.bottom = '5px';
-									emojiEl.style.transform = 'translateX(0) translateY(0)';
-									emojiEl.style.fontSize = '16px';
-									emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
-								}
-								alert('Upload successful!');
-							} else {
-								console.error('Upload failed, no imageUrl returned:', data);
-								alert('Sorry, the upload failed. Please try again.');
-							}
+							progressBar = document.createElement('div');
+							progressBar.id = 'upload-progress-bar';
+							progressBar.style.width = '0%';
+							progressBar.style.height = '100%';
+							progressBar.style.backgroundColor = '#4caf50';
+							progressContainer.appendChild(progressBar);
+							document.body.appendChild(progressContainer);
 						} else {
-							alert('Upload failed with status ' + xhr.status);
+							progressBar = document.getElementById('upload-progress-bar');
 						}
-					};
 
-					xhr.onerror = function() {
-						alert('An error occurred while uploading. Please try again.');
-					};
+						// Show the progress bar
+						progressContainer.style.display = 'block';
+						progressBar.style.width = '0%';
 
-					xhr.send(JSON.stringify({ imageData: dataURL }));
-					fileInput.value = '';
+						var xhr = new XMLHttpRequest();
+						xhr.open('POST', '/.netlify/functions/upload');
+						xhr.setRequestHeader('Content-Type', 'application/json');
+						
+						xhr.upload.onprogress = function(event) {
+							if (event.lengthComputable) {
+								var percentComplete = (event.loaded / event.total) * 100;
+								progressBar.style.width = percentComplete + '%';
+							}
+						};
+
+						xhr.onload = function() {
+							// Hide progress bar after a short delay
+							setTimeout(function() {
+								progressContainer.style.display = 'none';
+							}, 500);
+
+							if (xhr.status >= 200 && xhr.status < 300) {
+								var data = JSON.parse(xhr.responseText);
+								if (data.imageUrl) {
+									// Save the returned Cloudinary URL in localStorage for persistence
+									var revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
+									revealedCubes[self.currentDayIdx] = data.imageUrl;
+									localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
+
+									// Update the background of the current cube with the new image
+									currentDay.cube.querySelectorAll('.cube__side').forEach(function(side) {
+										side.style.backgroundImage = `url(${data.imageUrl})`;
+									});
+
+									// Adjust the emoji positioning if an image exists
+									var emojiEl = currentDay.cube.querySelector('.cube__emoji');
+									if (emojiEl) {
+										emojiEl.style.left = 'unset';
+										emojiEl.style.right = '10px';
+										emojiEl.style.top = 'unset';
+										emojiEl.style.bottom = '5px';
+										emojiEl.style.transform = 'translateX(0) translateY(0)';
+										emojiEl.style.fontSize = '16px';
+										emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
+									}
+									alert('Upload successful!');
+								} else {
+									console.error('Upload failed, no imageUrl returned:', data);
+									alert('Sorry, the upload failed. Please try again.');
+								}
+							} else {
+								alert('Upload failed with status ' + xhr.status);
+							}
+						};
+
+						xhr.onerror = function() {
+							alert('An error occurred while uploading. Please try again.');
+						};
+
+						xhr.send(JSON.stringify({ imageData: dataURL }));
+						fileInput.value = '';
+					});
 				};
 				reader.readAsDataURL(file);
 			};

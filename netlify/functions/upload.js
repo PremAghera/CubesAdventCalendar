@@ -47,7 +47,7 @@ exports.handler = async (event, context) => {
   }
   
   // Optional: Check for a reasonable file size by examining the length of the Data URL
-  const MAX_SIZE = 9 * 1024 * 1024; // Rough threshold for a 5MB file (this is an approximate check)
+  const MAX_SIZE = 8 * 1024 * 1024; // Rough threshold for a 5MB file (this is an approximate check)
   if (data.imageData.length > MAX_SIZE) {
     console.error("Image data exceeds size limit");
     return {
