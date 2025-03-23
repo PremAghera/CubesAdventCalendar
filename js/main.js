@@ -330,6 +330,8 @@
 			}
 		};
 		backCtrl.addEventListener('click', this.backToCalendarFn);
+		uploadCtrl.addEventListener('click', this.backToCalendarFn);
+
 	};
 
 	Calendar.prototype._initDayEvents = function(day) {
@@ -531,6 +533,15 @@
 			translateY: [50,0]
 		});
 
+		anime({
+			targets: uploadCtrl,
+			duration: 1000,
+			delay: 800,
+			easing: 'easeOutExpo',
+			opacity: [0,1],
+			translateY: [50,0]
+		});
+
 		contentNumber.innerHTML = this.currentDayIdx + 1;
 		anime({
 			targets: contentNumber,
@@ -563,6 +574,15 @@
 		// The back button animation.
 		anime({
 			targets: backCtrl,
+			duration: 1000,
+			easing: 'easeInExpo',
+			opacity: 0,
+			translateY: 50
+		});
+
+		// The upload button animation.
+		anime({
+			targets: uploadCtrl,
 			duration: 1000,
 			easing: 'easeInExpo',
 			opacity: 0,
@@ -713,6 +733,7 @@
 		colortimeout,
 		contentEl = document.querySelector('.content'),
 		contents = contentEl.querySelectorAll('.content__block'),
+		uploadCtrl = contentEl.querySelector('.upload'),
 		backCtrl = contentEl.querySelector('.btn-back'),
 		contentNumber = contentEl.querySelector('.content__number'),
 		isMobile = mobilecheck();

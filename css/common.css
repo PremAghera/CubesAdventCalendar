@@ -520,7 +520,7 @@ main {
 	position: absolute;
 }
 
-.btn-back {
+.btn-back, .upload {
 	font-size: 2em;
 	line-height: 2;
 	position: absolute;
@@ -538,12 +538,17 @@ main {
 	background: none;
 }
 
-.btn-back:focus {
+.upload {
+	right: 5vw!important;
+}
+
+.btn-back:focus, .upload:focus {
 	outline: none;
 }
 
 .no-js .content__number,
-.no-js .btn-back {
+.no-js .btn-back,
+.no-js .upload {
 	display: none;
 }
 
@@ -551,7 +556,8 @@ main {
 .js .content__description,
 .js .content__meta,
 .js .content__number,
-.js .btn-back {
+.js .btn-back,
+.js .upload {
 	opacity: 0;
 }
 
@@ -624,11 +630,16 @@ main {
 		padding: 2em;
 		width: 100%;
 	}
-	.btn-back {
-		font-size: 1.25em;
+	.btn-back, .upload {
+		font-size: 2em;
+		line-height: 1.4;
+		width: 1.6em;
 		bottom: auto;
 		top: 0;
-		margin: 0.5em;
+		margin: 1em;
+	}
+	.upload {
+		right: 14vw !important;
 	}
 }
 
