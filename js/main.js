@@ -568,43 +568,120 @@
 		
 		// Day/Cube mouseenter/mouseleave event.
 		if( !isMobile ) {
-			day.mouseenterFn = function(ev) {
-				if( day.isRotated || self.isOpen ) {
+			instance.mouseenterFn = function(ev) {
+				if( instance.isRotated || self.isOpen ) {
 					return false;
-				}
+				};
 				clearTimeout(colortimeout);
-				day.rotatetimeout = setTimeout(function() {
-					colortimeout = setTimeout(function() { self._changeBGColor(day.color); }, 30);
-					day._rotate(ev);
-					self._showPreviewTitle(day.previewTitle, day.number);
-					day.isRotated = true;
+				instance.rotatetimeout = setTimeout(function() {
+					colortimeout = setTimeout(function() { self._changeBGColor(instance.color); }, 30);
+					instance._rotate(ev);
+					self._showPreviewTitle(instance.previewTitle, instance.number);
+					instance.isRotated = true;
 				}, 30);
 			};
-			day.mouseleaveFn = function(ev) {
+			instance.mouseleaveFn = function(ev) {
 				if( self.isOpen ) {
 					return false;
-				}
-				clearTimeout(day.rotatetimeout);
+				};
+				clearTimeout(instance.rotatetimeout);
 				clearTimeout(colortimeout);
-				if( day.isRotated ) {
+				if( instance.isRotated ) {
 					colortimeout = setTimeout(function() { self._resetBGColor(); }, 35);
 					self._resetBGColor();
-					day._rotate(ev);
+					instance._rotate(ev);
 					self._hidePreviewTitle();
-					day.isRotated = false;
+					instance.isRotated = false;
 				}
 			};
 		}
 		
 		// Day/Cube click event.
-		day.clickFn = function(ev) {
-			// click logic here...
+		instance.clickFn = function(ev) {
+			
+			// If the day is inactive or if the calendar is currently animating then do nothing.
+			
+			if (!instance.isActive || self.isAnimating) {
+                return false;
+            }
+            self.isAnimating = true;
+            self.isOpen = true;
+            self.currentDayIdx = instance.number;
+
+            // [Removed the hardcoded revealedImages array and direct assignment here]
+            // Instead, if the user has already uploaded something, it’s in localStorage;
+            // if not, the user can upload from the details page.
+
+            // Hide the main container
+            anime({
+                targets: self.el,
+                duration: 1200,
+                easing: 'easeInOutExpo',
+                opacity: 0,
+                complete: function() {
+                    self.isAnimating = false;
+                }
+            });
+		
+			// Find the revealed image for this cube
+			if (isMobile) {
+			    self._changeBGColor(instance.color);
+			}
+			// Change background to the revealed version
+		
+			// Hide the main container (same as existing logic)
+			anime({
+				targets: self.el,
+				duration: 1200,
+				easing: 'easeInOutExpo',
+				opacity: 0,
+				complete: function() {
+					self.isAnimating = false;
+				}
+			});
+		
+			for (var i = 0, totalDays = self.days.length; i < totalDays; ++i) {
+				var day = self.days[i];		
+				if (self.currentDayIdx === i) {
+					anime({
+						targets: day.cube,
+						duration: 600,
+						delay: 200,
+						easing: 'easeInExpo',
+						scale: 1.1,
+						translateY: -window.innerHeight * 2,
+						translateZ: day.currentTransform.translateZ,
+						rotateX: day.currentTransform.rotateX,
+						rotateY: day.currentTransform.rotateY
+					});
+		
+					self._showContent(instance);
+				} else {
+					var bcr = day.cube.getBoundingClientRect();
+					anime({
+						targets: day.cube,
+						duration: 1200,
+						easing: 'easeInOutExpo',
+						scale: 0.1,
+						translateX: function(el, index) {
+							return bcr.left + window.pageXOffset <= window.innerWidth / 2 ? anime.random(-800, 0) : anime.random(0, 800);
+						},
+						translateY: function(el, index) {
+							return bcr.top + window.pageYOffset <= window.innerHeight / 2 ? anime.random(-1400, -200) : anime.random(-200, 600);
+						},
+						translateZ: -1500,
+						rotateY: function(el, index) {
+							return bcr.left + window.pageXOffset <= window.innerWidth / 2 ? anime.random(-40, 0) : anime.random(0, 40);
+						}
+					});
+				}
+			}
 		};
-		day.cube.querySelector('.cube__side--front').addEventListener('mouseenter', day.mouseenterFn);
-		day.cube.addEventListener('mouseleave', day.mouseleaveFn);
-		day.cube.addEventListener('click', day.clickFn);
-		day.cube.addEventListener('mousedown', function() {
-			clearTimeout(day.rotatetimeout);
+		instance.cube.querySelector('.cube__side--front').addEventListener('mouseenter', instance.mouseenterFn);
+		instance.cube.addEventListener('mouseleave', instance.mouseleaveFn);
+		instance.cube.addEventListener('click', instance.clickFn);
+		instance.cube.addEventListener('mousedown', function() {
+			clearTimeout(instance.rotatetimeout );
 		});
 	};
 
