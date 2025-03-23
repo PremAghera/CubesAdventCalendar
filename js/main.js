@@ -366,57 +366,96 @@
                 reader.onload = function(ev) {
                     var dataURL = ev.target.result;
 
-                    // Call your Netlify serverless function to handle the upload
-                    fetch('/.netlify/functions/upload', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ imageData: dataURL })
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Upload failed with status ' + response.status);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.imageUrl) {
-                            // Save the returned Cloudinary URL in localStorage for persistence
-                            var revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
-                            revealedCubes[self.currentDayIdx] = data.imageUrl;
-                            localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
+					// Create (or get existing) progress bar element
+					var progressContainer = document.getElementById('upload-progress-container');
+					var progressBar;
+					if (!progressContainer) {
+						progressContainer = document.createElement('div');
+						progressContainer.id = 'upload-progress-container';
+						progressContainer.style.position = 'fixed';
+						progressContainer.style.top = '0';
+						progressContainer.style.left = '0';
+						progressContainer.style.width = '100%';
+						progressContainer.style.height = '4px';
+						progressContainer.style.backgroundColor = '#ccc';
+						progressContainer.style.zIndex = '9999';
+						progressContainer.style.display = 'none';
+						progressBar = document.createElement('div');
+						progressBar.id = 'upload-progress-bar';
+						progressBar.style.width = '0%';
+						progressBar.style.height = '100%';
+						progressBar.style.backgroundColor = '#4caf50';
+						progressContainer.appendChild(progressBar);
+						document.body.appendChild(progressContainer);
+					} else {
+						progressBar = document.getElementById('upload-progress-bar');
+					}
 
-                            // Update the background of the current cube with the new image
-                            currentDay.cube.querySelectorAll('.cube__side').forEach(side => {
-                                side.style.backgroundImage = `url(${data.imageUrl})`;
-                            });
+					// Show the progress bar
+					progressContainer.style.display = 'block';
+					progressBar.style.width = '0%';
 
-                            // Translate the emoji to the bottom right corner if an image exists
-                            var emojiEl = currentDay.cube.querySelector('.cube__emoji');
-                            if (emojiEl) {
-                                emojiEl.style.left = 'unset';
-                                emojiEl.style.right = '10px';
-                                emojiEl.style.top = 'unset';
-                                emojiEl.style.bottom = '5px';
-                                emojiEl.style.transform = 'translateX(0) translateY(0)';
-                                emojiEl.style.fontSize = '16px';
-                                emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
-                            }
-                        } else {
-                            console.error('Upload failed, no imageUrl returned:', data);
-                            alert('Sorry, the upload failed. Please try again.');
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error uploading image:', err);
-                        alert('An error occurred while uploading. Please try again.');
-                    })
-                    .finally(() => {
-                        // Reset file input so iOS can pick the same file again
-                        fileInput.value = '';
-                    });
-                };
-                reader.readAsDataURL(file);
-            };
+					var xhr = new XMLHttpRequest();
+					xhr.open('POST', '/.netlify/functions/upload');
+					xhr.setRequestHeader('Content-Type', 'application/json');
+					
+					xhr.upload.onprogress = function(event) {
+						if (event.lengthComputable) {
+							var percentComplete = (event.loaded / event.total) * 100;
+							progressBar.style.width = percentComplete + '%';
+						}
+					};
+
+					xhr.onload = function() {
+						// Hide progress bar after a short delay
+						setTimeout(function() {
+							progressContainer.style.display = 'none';
+						}, 500);
+
+						if (xhr.status >= 200 && xhr.status < 300) {
+							var data = JSON.parse(xhr.responseText);
+							if (data.imageUrl) {
+								// Save the returned Cloudinary URL in localStorage for persistence
+								var revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
+								revealedCubes[self.currentDayIdx] = data.imageUrl;
+								localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
+
+								// Update the background of the current cube with the new image
+								currentDay.cube.querySelectorAll('.cube__side').forEach(function(side) {
+									side.style.backgroundImage = `url(${data.imageUrl})`;
+								});
+
+								// Adjust the emoji positioning if an image exists
+								var emojiEl = currentDay.cube.querySelector('.cube__emoji');
+								if (emojiEl) {
+									emojiEl.style.left = 'unset';
+									emojiEl.style.right = '10px';
+									emojiEl.style.top = 'unset';
+									emojiEl.style.bottom = '5px';
+									emojiEl.style.transform = 'translateX(0) translateY(0)';
+									emojiEl.style.fontSize = '16px';
+									emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
+								}
+								alert('Upload successful!');
+							} else {
+								console.error('Upload failed, no imageUrl returned:', data);
+								alert('Sorry, the upload failed. Please try again.');
+							}
+						} else {
+							alert('Upload failed with status ' + xhr.status);
+						}
+					};
+
+					xhr.onerror = function() {
+						alert('An error occurred while uploading. Please try again.');
+					};
+
+					xhr.send(JSON.stringify({ imageData: dataURL }));
+					fileInput.value = '';
+				};
+				reader.readAsDataURL(file);
+			
+			};
 
             // Programmatically click the hidden input so the user sees the file picker
             fileInput.click();
