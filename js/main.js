@@ -360,6 +360,34 @@
 				img.src = dataURL;
 			}
 
+			function uploadToCloudinary(file, dayNumber, onSuccess, onError) {
+				// We'll do a direct POST to Cloudinary's unsigned upload endpoint:
+				const url = 'https://api.cloudinary.com/v1_1/dyupj51le/image/upload';
+				
+				// Build the FormData
+				const formData = new FormData();
+				formData.append('file', file);
+				// The unsigned preset you created in your Cloudinary settings
+				formData.append('upload_preset', 'fridaypreset');
+				// Overwrite the same public ID for this cube/day
+				formData.append('public_id', `cube_${dayNumber}`);
+			  
+				fetch(url, {
+				  method: 'POST',
+				  body: formData
+				})
+				.then(res => res.json())
+				.then(data => {
+				  // data.secure_url is the new image's URL on Cloudinary
+				  if (data.secure_url) {
+					onSuccess(data.secure_url);
+				  } else {
+					onError(data);
+				  }
+				})
+				.catch(err => onError(err));
+			  }
+
             // Only allow uploads if a cube is actually open (i.e. details page is showing).
             if (!self.isOpen || self.isAnimating) {
                 return false;
@@ -454,10 +482,16 @@
 							if (xhr.status >= 200 && xhr.status < 300) {
 								var data = JSON.parse(xhr.responseText);
 								if (data.imageUrl) {
-									// Save the returned Cloudinary URL in localStorage for persistence
-									var revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
-									revealedCubes[self.currentDayIdx] = data.imageUrl;
-									localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
+								// Update the centralized mapping on the server
+								fetch('/.netlify/functions/updateCube', {
+								    method: 'POST',
+								    headers: { 'Content-Type': 'application/json' },
+								    body: JSON.stringify({ day: self.currentDayIdx, imageUrl: data.imageUrl })
+								}).then(res => {
+								    if (!res.ok) {
+								        console.error('Failed to update the backend mapping.');
+								    }
+								}).catch(err => console.error('Error updating the backend mapping:', err));
 
 									// Update the background of the current cube with the new image
 									currentDay.cube.querySelectorAll('.cube__side').forEach(function(side) {
@@ -501,6 +535,23 @@
 					}
 				};
 				reader.readAsDataURL(file);
+
+				uploadToCloudinary(file, self.currentDayIdx,
+					function(cloudUrl) {
+					  // 1. Update the cube's background to the known Cloudinary URL
+					  currentDay.cube.querySelectorAll('.cube__side').forEach(side => {
+						side.style.backgroundImage = `url(${cloudUrl})`;
+					  });
+					  // 2. (Optional) Adjust your emoji position, show an alert, etc.
+					  alert('Upload successful!');
+					},
+					function(error) {
+					  alert('Upload failed: ' + JSON.stringify(error));
+					}
+				  );
+
+
+
 			};
 
             // Programmatically click the hidden input so the user sees the file picker
@@ -514,27 +565,6 @@
 
 	Calendar.prototype._initDayEvents = function(day) {
 		var self = this;
-		// Load saved revealed cubes
-		let revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
-		var instance = day;
-		if (revealedCubes[instance.number]) {
-		    let savedImage = revealedCubes[instance.number];
-		    instance.cube.querySelectorAll('.cube__side').forEach(side => {
-		        side.style.backgroundImage = `url(${savedImage})`;
-		    });
-		    // Translate the emoji to the bottom right corner if an image exists
-		    var emojiEl = instance.cube.querySelector('.cube__emoji');
-		    if (emojiEl) {
-		        emojiEl.style.left = 'unset';
-		        emojiEl.style.right = '10px';
-		        emojiEl.style.top = 'unset';
-		        emojiEl.style.bottom = '5px';
-		        emojiEl.style.transform = 'translateX(0) translateY(0)';
-				emojiEl.style.fontSize = '16px';
-				emojiEl.style.textShadow = '2px 2px 2px #2b2b2b';
-
-		    }
-		}
 		
 		// Day/Cube mouseenter/mouseleave event.
 		if( !isMobile ) {
@@ -654,6 +684,36 @@
 			clearTimeout(instance.rotatetimeout );
 		});
 	};
+
+	Calendar.prototype.loadImages = function() {
+		this.days.forEach(day => {
+		  const dayNumber = day.number;
+		  // Construct the Cloudinary URL.
+		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/cube_${dayNumber}.webp`;
+		  // Define a local fallback URL (adjust the path and file extension as needed).
+		  const localUrl = `./images/placeholder/cube_${dayNumber}.webp`;
+		  
+		  // Create an Image object to test if the Cloudinary image exists.
+		  const testImg = new Image();
+		  
+		  testImg.onload = function() {
+			// Cloud image exists – update the cube's background.
+			day.cube.querySelectorAll('.cube__side').forEach(side => {
+			  side.style.backgroundImage = `url(${cloudUrl})`;
+			});
+		  };
+		  
+		  testImg.onerror = function() {
+			// Cloud image failed to load – use the local fallback image.
+			day.cube.querySelectorAll('.cube__side').forEach(side => {
+			  side.style.backgroundImage = `url(${localUrl})`;
+			});
+		  };
+		  
+		  // Start loading the image.
+		  testImg.src = cloudUrl;
+		});
+	  };
 
 	Calendar.prototype._rotateCalendar = function(mousepos) {
 		// Transform values.
@@ -933,6 +993,7 @@
 
 	function layout() {
 		const calendar = new Calendar(calendarEl);
+		calendar.loadImages();
 		// If settings.snow === true then create the canvas element for the snow effect.
 		if( settings.snow ) {
 			var snow = new Snow();
@@ -950,7 +1011,7 @@
 				tapTimeout = setTimeout(() => {
 					tapCount = 0;
 				}, 3000); // 3-second window
-
+ 
 				if (tapCount >= 3) {
 					if (typeof DeviceOrientationEvent !== 'undefined' &&
 						typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -972,6 +1033,44 @@
 					tapCount = 0;
 				}
 			});
+		}
+		
+		// Reset logic: clicking the Friday 2025 title 5 times resets the app
+		let resetTapCount = 0;
+		let resetTapTimeout = null;
+		const fridayTitleEl = document.querySelector('.friday-title');
+		if (fridayTitleEl) {
+		fridayTitleEl.addEventListener('click', () => {
+			resetTapCount++;
+			if (resetTapTimeout) clearTimeout(resetTapTimeout);
+			resetTapTimeout = setTimeout(() => { resetTapCount = 0; }, 3000); // 3-second window
+
+			if (resetTapCount >= 5) {
+			// Immediately update cubes to local fallback images.
+			calendar.days.forEach(day => {
+				const dayNumber = day.number;
+				const localUrl = `./images/placeholder/cube_${dayNumber}.webp`;
+				day.cube.querySelectorAll('.cube__side').forEach(side => {
+				side.style.backgroundImage = `url(${localUrl})`;
+				});
+			});
+
+			// Then reset the centralized mapping on the server.
+			fetch('/.netlify/functions/reset', { method: 'POST' })
+				.then(res => {
+				if (res.ok) {
+					alert('Reset successful!');
+					window.location.reload();
+				} else {
+					alert('Reset failed on the server.');
+				}
+				})
+				.catch(err => {
+				alert('Reset failed: ' + err);
+				});
+			resetTapCount = 0;
+			}
+		});
 		}
 	}
 
