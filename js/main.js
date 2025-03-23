@@ -330,7 +330,61 @@
 			}
 		};
 		backCtrl.addEventListener('click', this.backToCalendarFn);
-		uploadCtrl.addEventListener('click', this.backToCalendarFn);
+		
+		this.uploadCtrlFn = function(ev) {
+            // Only allow uploads if a cube is actually open (i.e. details page is showing).
+            if (!self.isOpen || self.isAnimating) {
+                return false;
+            }
+
+            // We'll get a reference to the currently open day/cube:
+            var currentDay = self.days[self.currentDayIdx];
+
+            // Create an <input type="file"> dynamically to trigger the file picker.
+            var fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*'; // let user pick images from phone/computer
+
+            // When the user picks a file:
+            fileInput.onchange = function(e) {
+                var file = e.target.files[0];
+                if (!file) return; // user canceled
+
+                // Read the file as a Data URL
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var dataURL = e.target.result;
+
+                    // Save this new image to localStorage, overwriting if it exists
+                    var revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
+                    revealedCubes[self.currentDayIdx] = dataURL;
+                    localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
+
+                    // Update the background of the current cube with the new image
+                    currentDay.cube.querySelectorAll('.cube__side').forEach(side => {
+                        side.style.backgroundImage = `url(${dataURL})`;
+                    });
+                    // Translate the emoji to the bottom right corner if an image exists
+                    var emojiEl = currentDay.cube.querySelector('.cube__emoji');
+                    if (emojiEl) {
+                        emojiEl.style.left = 'unset';
+                        emojiEl.style.right = '10px';
+                        emojiEl.style.top = 'unset';
+                        emojiEl.style.bottom = '5px';
+                        emojiEl.style.transform = 'translateX(0) translateY(0)';
+						emojiEl.style.fontSize = '16px';
+						emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+
+            // Programmatically click the hidden input so the user sees the file picker
+            fileInput.click();
+        };
+
+        // Attach this new upload function to the uploadCtrl button:
+        uploadCtrl.addEventListener('click', this.uploadCtrlFn);
 
 	};
 
@@ -344,6 +398,18 @@
 		    instance.cube.querySelectorAll('.cube__side').forEach(side => {
 		        side.style.backgroundImage = `url(${savedImage})`;
 		    });
+		    // Translate the emoji to the bottom right corner if an image exists
+		    var emojiEl = instance.cube.querySelector('.cube__emoji');
+		    if (emojiEl) {
+		        emojiEl.style.left = 'unset';
+		        emojiEl.style.right = '10px';
+		        emojiEl.style.top = 'unset';
+		        emojiEl.style.bottom = '5px';
+		        emojiEl.style.transform = 'translateX(0) translateY(0)';
+				emojiEl.style.fontSize = '16px';
+				emojiEl.style.textShadow = '2px 2px 2px #2b2b2b';
+
+		    }
 		}
 		
 		// Day/Cube mouseenter/mouseleave event.
@@ -375,40 +441,39 @@
 				}
 			};
 		}
+		
 		// Day/Cube click event.
 		instance.clickFn = function(ev) {
+			
 			// If the day is inactive or if the calendar is currently animating then do nothing.
+			
 			if (!instance.isActive || self.isAnimating) {
-				return false;
-			}
+                return false;
+            }
+            self.isAnimating = true;
+            self.isOpen = true;
+            self.currentDayIdx = instance.number;
+
+            // [Removed the hardcoded revealedImages array and direct assignment here]
+            // Instead, if the user has already uploaded something, it’s in localStorage;
+            // if not, the user can upload from the details page.
+
+            // Hide the main container
+            anime({
+                targets: self.el,
+                duration: 1200,
+                easing: 'easeInOutExpo',
+                opacity: 0,
+                complete: function() {
+                    self.isAnimating = false;
+                }
+            });
+		
+			// Find the revealed image for this cube
 			if (isMobile) {
 			    self._changeBGColor(instance.color);
 			}
-			self.isAnimating = true;
-			self.isOpen = true;
-			self.currentDayIdx = instance.number;
-		
-			// Define "revealed" images corresponding to the shadow ones
-			const revealedImages = [
-				'../img/flowers.webp',  // Cube 1 revealed image
-				'../img/mandala2_revealed.png', // Cube 2 revealed image
-				'../img/mandala3_revealed.png', // Cube 3 revealed image
-				'../img/flowers_revealed.webp', // Cube 4 revealed image
-				'../img/mandala5_revealed.png', // Cube 5 revealed image
-				'../img/mandala6_revealed.png'  // Cube 6 revealed image
-			];
-		
-			// Find the revealed image for this cube
-			let revealedImage = revealedImages[self.currentDayIdx % revealedImages.length];
-		
 			// Change background to the revealed version
-			instance.cube.querySelectorAll('.cube__side').forEach(side => {
-				side.style.backgroundImage = `url(${revealedImage})`;
-			});
-			// Store revealed cube in localStorage
-			let revealedCubes = JSON.parse(localStorage.getItem('revealedCubes')) || {};
-			revealedCubes[self.currentDayIdx] = revealedImage;
-			localStorage.setItem('revealedCubes', JSON.stringify(revealedCubes));
 		
 			// Hide the main container (same as existing logic)
 			anime({
