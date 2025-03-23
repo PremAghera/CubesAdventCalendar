@@ -383,9 +383,9 @@
                     fileInput.value = '';
                     return;
                 }
-                var MAX_SIZE = 8 * 1024 * 1024; // 8MB limit
+                var MAX_SIZE = 25 * 1024 * 1024; // 25MB limit
                 if (file.size > MAX_SIZE) {
-                    alert('File is too large (max 8MB). Please select a smaller image.');
+                    alert('File is too large (max 25MB). Please select a smaller image.');
                     fileInput.value = '';
                     return;
                 }
@@ -393,8 +393,16 @@
                 var reader = new FileReader();
                 reader.onload = function(ev) {
 					var originalDataURL = ev.target.result;
-					// Compress the image (quality: 0.6, max dimensions: 1024x1024)
-					compressImage(originalDataURL, 0.6, 1024, 1024, function(compressedDataURL) {
+					// Compress the image (quality: 0.8, max dimensions: 1024x1024)
+					compressImage(originalDataURL, 0.8, 1024, 1024, function(compressedDataURL) {
+						var estimatedSize = dataURLtoBytes(compressedDataURL);
+						var MAX_COMPRESSED_SIZE = 8 * 1024 * 1024; // 8MB limit
+						if (estimatedSize > MAX_COMPRESSED_SIZE) {
+							alert('Compressed image is too large (' + (estimatedSize/1024).toFixed(2) + 'KB). Please select a smaller image.');
+							fileInput.value = '';
+							return;
+						}
+
 						var dataURL = compressedDataURL;
 
 						// Create (or get existing) progress bar element
@@ -484,6 +492,13 @@
 						xhr.send(JSON.stringify({ imageData: dataURL }));
 						fileInput.value = '';
 					});
+					function dataURLtoBytes(dataURL) {
+						var base64String = dataURL.split(',')[1];
+						var padding = (base64String.endsWith('==') ? 2 : (base64String.endsWith('=') ? 1 : 0));
+						var base64Length = base64String.length;
+						var inBytes = Math.ceil(base64Length * 3 / 4) - padding;
+						return inBytes;
+					}
 				};
 				reader.readAsDataURL(file);
 			};
