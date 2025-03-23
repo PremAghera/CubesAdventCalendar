@@ -1,3 +1,5 @@
 *.DS_Store
 cert.perm
 key.perm
+# Local Netlify folder
+.netlify

@@ -1,5 +1,7 @@
-const fetch = require('node-fetch');
-const FormData = require('form-data');
+exports.handler = async (event, context) => {
+    const { default: fetch } = await import('node-fetch');
+    const { default: FormData } = await import('form-data');
+  }
 
 exports.handler = async (event, context) => {
   // Only allow POST requests
