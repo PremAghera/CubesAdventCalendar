@@ -13,6 +13,10 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+html, body {
+    overflow: hidden;
+}
+
 a {
 	color: #777785;
 	outline: none;
@@ -225,7 +229,7 @@ main {
     -webkit-perspective: 1500px;
     perspective: 1500px;
     -webkit-perspective-origin: 50% 55%; /* Centered in the middle */
-    perspective-origin: 50% 55%; /* Centered in the middle */
+    perspective-origin: 50% 35%; /* Centered in the middle */
     padding: 0 calc((100vw - (7 * (7vw + 1vw))) / 2) 5em;
 }
 
@@ -274,20 +278,6 @@ main {
     margin: 0 auto;
 	-webkit-transform-style: preserve-3d;
 	transform-style: preserve-3d;
-}
-
-@media screen and (max-width: 768px) {
-    .cubes {
-        display: grid;
-        width: 60vw; /* Make it full width on mobile */
-        grid-template-columns: repeat(auto-fit, minmax(14vw, 1fr)); /* Responsive grid */
-        grid-gap: 4vw; /* Increase spacing for mobile */
-        justify-content: center; /* Ensure grid stays centered */
-    }
-    .cube {
-        width: 24vw;  /* Larger cube size on mobile */
-        height: 24vw;
-    }
 }
 
 /* Single cube */
@@ -569,6 +559,20 @@ main {
 	opacity: 1;
 }
 
+@media screen and (max-width: 768px) {
+    .cubes {
+        display: grid;
+        width: 70vw; /* Make it full width on mobile */
+        grid-template-columns: repeat(auto-fit, minmax(20vw, 1fr)); /* Responsive grid */
+        grid-gap: 5vw; /* Increase spacing for mobile */
+        justify-content: center; /* Ensure grid stays centered */
+    }
+    .cube {
+        width: 16vw;  /* Larger cube size on mobile */
+        height: 16vw;
+    }
+}
+
 @media screen and (max-width: 50.75em) {
 	/* .calendar {
 		padding: 3em calc((100vw - (7 * (14vw + 1vw)))/2);
@@ -577,36 +581,36 @@ main {
 		padding: 0 calc((100vw - (7 * (12vw + 1vw)))/2) 5em;
 	} */
 	.cube {
-		width: 12vw;
-		height: 12vw;
+		width: 16vw;
+		height: 16vw;
 	}
 	/* push to the right weekday if in big view (we have to push 3 boxes) */
 	/* .js .cube:first-child {
 		margin-left: calc(((12vw + 1vw) * 3) + 0.5vw);
 	} */
 	.cube__side--front {
-		-webkit-transform: translateZ(6vw);
-		transform: translateZ(6vw);
+		-webkit-transform: translateZ(8vw);
+		transform: translateZ(8vw);
 	}
 	.cube__side--back {
-		-webkit-transform: rotateY(180deg) translateZ(6vw);
-		transform: rotateY(180deg) translateZ(6vw);
+		-webkit-transform: rotateY(180deg) translateZ(8vw);
+		transform: rotateY(180deg) translateZ(8vw);
 	}
 	.cube__side--right {
-		-webkit-transform: rotateY(90deg) translateZ(6vw);
-		transform: rotateY(90deg) translateZ(6vw);
+		-webkit-transform: rotateY(90deg) translateZ(8vw);
+		transform: rotateY(90deg) translateZ(8vw);
 	}
 	.cube__side--left {
-		-webkit-transform: rotateY(-90deg) translateZ(6vw);
-		transform: rotateY(-90deg) translateZ(6vw);
+		-webkit-transform: rotateY(-90deg) translateZ(8vw);
+		transform: rotateY(-90deg) translateZ(8vw);
 	}
 	.cube__side--top {
-		-webkit-transform: rotateX(90deg) translateZ(6vw);
-		transform: rotateX(90deg) translateZ(6vw);
+		-webkit-transform: rotateX(90deg) translateZ(8vw);
+		transform: rotateX(90deg) translateZ(8vw);
 	}
 	.cube__side--bottom {
-		-webkit-transform: rotateX(-90deg) translateZ(6vw);
-		transform: rotateX(-90deg) translateZ(6vw);
+		-webkit-transform: rotateX(-90deg) translateZ(8vw);
+		transform: rotateX(-90deg) translateZ(8vw);
 	}
 	.title {
 		font-size: 5vw;
