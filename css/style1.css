@@ -77,6 +77,11 @@
 	background-image: url(../img/sakura14.webp);
 }
 
+.cube:not(.cube--inactive):nth-child(15n) .cube__side,
+.no-js .cube:not(.cube--inactive):nth-child(15n) {
+	background-image: url(../img/sakura15.webp);
+}
+
 
 
 .cube--inactive .cube__side,

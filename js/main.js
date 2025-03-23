@@ -90,7 +90,7 @@
 		emojiEl.style.position = 'absolute';
 		emojiEl.style.left = '50%';
 		emojiEl.style.bottom = '10px'; // consistent baseline
-		emojiEl.style.transform = 'translateX(-50%) translateY(0)';
+		emojiEl.style.transform = 'translateX(-50%) translateY(-20%)';
 		emojiEl.style.fontSize = 'clamp(20px, 4vw, 36px)';
 		emojiEl.style.pointerEvents = 'none';
 	};
@@ -239,29 +239,34 @@
 			};
 			
 			this.handleOrientation = function(event) {
-				if (self.isOpen) return false;
-	
-				var x = event.beta;  // front-back tilt [-180,180]
-				var y = event.gamma; // left-right tilt [-90,90]
-	
-				// Clamp values to avoid extreme tilts
-				x = Math.max(-90, Math.min(90, x));
-				y = Math.max(-90, Math.min(90, y));
-	
-				// Normalize to [0,180]
-				x += 90;
-				y += 90;
-	
-				var movement = { rx: 21, ry: 40 };
-				var rotX = 2 * movement.rx / 180 * x - movement.rx;
-				// var rotY = 2 * movement.ry / 180 * y - movement.ry;
-				// var rotX = movement.rx - (2 * movement.rx / 180 * x);
-				var rotY = movement.ry - (2 * movement.ry / 180 * y);
-	
-				requestAnimationFrame(function() {
-					self.cubes.style.WebkitTransform = self.cubes.style.transform = 
-						'rotate3d(-1,0,0,' + rotX + 'deg) rotate3d(0,-1,0,' + rotY + 'deg)';
-				});
+			    if (self.isOpen) return false;
+			
+			    // On the first event, store the initial orientation as baseline
+			    if (typeof self.initialBeta === 'undefined') {
+			        self.initialBeta = event.beta;
+			        self.initialGamma = event.gamma;
+			    }
+			
+			    // Compute relative orientation from the baseline
+			    var relBeta = event.beta - self.initialBeta;  // front-back relative tilt
+			    var relGamma = event.gamma - self.initialGamma; // left-right relative tilt
+			
+			    // Clamp relative values to avoid extreme tilts
+			    relBeta = Math.max(-90, Math.min(90, relBeta));
+			    relGamma = Math.max(-90, Math.min(90, relGamma));
+			
+			    // Normalize to [0, 180] where 90 means no rotation
+			    relBeta += 90;
+			    relGamma += 90;
+			
+			    var movement = { rx: 21, ry: 40 };
+			    var rotX = 2 * movement.rx / 180 * relBeta - movement.rx;
+			    var rotY = movement.ry - (2 * movement.ry / 180 * relGamma);
+			
+			    requestAnimationFrame(function() {
+			        self.cubes.style.WebkitTransform = self.cubes.style.transform = 
+			            'rotate3d(-1,0,0,' + rotX + 'deg) rotate3d(0,-1,0,' + rotY + 'deg)';
+			    });
 			};
 			window._calendarHandleOrientation = this.handleOrientation;
 			if( isMobile ) {
@@ -373,6 +378,9 @@
 			// If the day is inactive or if the calendar is currently animating then do nothing.
 			if (!instance.isActive || self.isAnimating) {
 				return false;
+			}
+			if (isMobile) {
+			    self._changeBGColor(instance.color);
 			}
 			self.isAnimating = true;
 			self.isOpen = true;
