@@ -565,6 +565,7 @@
 
 	Calendar.prototype._initDayEvents = function(day) {
 		var self = this;
+		var instance = day;
 		
 		// Day/Cube mouseenter/mouseleave event.
 		if( !isMobile ) {
