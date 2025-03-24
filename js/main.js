@@ -684,7 +684,7 @@
 				emojiEl.style.top = 'unset';
 				emojiEl.style.bottom = '5px';
 				emojiEl.style.transform = 'translateX(0) translateY(0)';
-				emojiEl.style.fontSize = '16px';
+				emojiEl.style.fontSize = '13px';
 				emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
 			}
 		  };
