@@ -690,7 +690,7 @@
 		this.days.forEach(day => {
 		  const dayNumber = day.number;
 		  // Construct the Cloudinary URL.
-		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/f_auto/custom${dayNumber}`;		  // Define a local fallback URL (adjust the path and file extension as needed).
+		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/custom${dayNumber}.webp`;		  // Define a local fallback URL (adjust the path and file extension as needed).
 		  const localUrl = `./img/sakura${dayNumber}.webp`;
 		  		  
 		  // Create an Image object to test if the Cloudinary image exists.
