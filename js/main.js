@@ -517,7 +517,7 @@
 						var formData = new FormData();
 						formData.append('file', webpBlob);
 						formData.append('upload_preset', 'fridaypreset');  // Your unsigned preset
-						formData.append('public_id', `custom${self.currentDayIdx}`);
+						formData.append('public_id', `customcube${self.currentDayIdx}`);
 						xhr.send(formData);
 						fileInput.value = '';
 					});
@@ -662,7 +662,7 @@
 		this.days.forEach(day => {
 		  const dayNumber = day.number;
 		  // Construct the Cloudinary URL.
-		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/custom${dayNumber}.webp`;		  // Define a local fallback URL (adjust the path and file extension as needed).
+		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/customcube${dayNumber}.webp`;		  // Define a local fallback URL (adjust the path and file extension as needed).
 		  const localUrl = `./img/sakura${dayNumber}.webp`;
 		  		  
 		  // Create an Image object to test if the Cloudinary image exists.
@@ -675,17 +675,31 @@
 			  // Ensure a visible fallback color if needed.
 			  side.style.backgroundColor = '';
 			});
+
+			// Shift the emoji to bottom-right if found
+			const emojiEl = day.cube.querySelector('.cube__emoji');
+			if (emojiEl) {
+				emojiEl.style.left = 'unset';
+				emojiEl.style.right = '10px';
+				emojiEl.style.top = 'unset';
+				emojiEl.style.bottom = '5px';
+				emojiEl.style.transform = 'translateX(0) translateY(0)';
+				emojiEl.style.fontSize = '16px';
+				emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
+			}
 		  };
 		  
 		  testImg.onerror = function() {
-			console.error('Failed to load Cloudinary image for custom cube ' + dayNumber + '. Falling back to local image.');
+			console.error('Failed to load Cloudinary image for cube ' + dayNumber + '. Falling back to local image.');
 			// Attempt to load the local fallback image.
 			const fallbackImg = new Image();
+
 			fallbackImg.onload = function() {
 			  day.cube.querySelectorAll('.cube__side').forEach(side => {
 				side.style.backgroundImage = `url(${localUrl})`;
 				side.style.backgroundColor = '';
 			  });
+
 			};
 			fallbackImg.onerror = function() {
 			  console.error('Failed to load local fallback for cube ' + dayNumber + '. Using default background color.');
@@ -1036,7 +1050,7 @@
 			// Immediately update cubes to local fallback images.
 			calendar.days.forEach(day => {
 				const dayNumber = day.number;
-				const localUrl = `./images/placeholder/cube_${dayNumber}.webp`;
+				const localUrl = `./img/sakura${dayNumber}.webp`;
 				day.cube.querySelectorAll('.cube__side').forEach(side => {
 				side.style.backgroundImage = `url(${localUrl})`;
 				});
