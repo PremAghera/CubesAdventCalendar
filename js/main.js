@@ -334,7 +334,7 @@
 		this.uploadCtrlFn = function(ev) {
 
 			// Add this helper function at the beginning of the uploadCtrlFn function:
-			function compressImage(dataURL, quality, maxWidth, maxHeight, callback) {
+			function compressImageToWebp(dataURL, quality, maxWidth, maxHeight, callback) {
 				var img = new Image();
 				img.onload = function() {
 					var canvas = document.createElement('canvas');
@@ -353,40 +353,31 @@
 					canvas.height = height;
 					var ctx = canvas.getContext('2d');
 					ctx.drawImage(img, 0, 0, width, height);
-					// Get the compressed image data URL in JPEG format
-					var compressedDataURL = canvas.toDataURL('image/jpeg', quality);
+					// Get the compressed image data URL in WEBP format
+					var compressedDataURL = canvas.toDataURL('image/webp', quality);
 					callback(compressedDataURL);
 				};
 				img.src = dataURL;
 			}
 
-			function uploadToCloudinary(file, dayNumber, onSuccess, onError) {
-				// We'll do a direct POST to Cloudinary's unsigned upload endpoint:
-				const url = 'https://api.cloudinary.com/v1_1/dyupj51le/image/upload';
-				
-				// Build the FormData
-				const formData = new FormData();
-				formData.append('file', file);
-				// The unsigned preset you created in your Cloudinary settings
-				formData.append('upload_preset', 'fridaypreset');
-				// Overwrite the same public ID for this cube/day
-				formData.append('public_id', `custom${dayNumber}`);
-			  
-				fetch(url, {
-				  method: 'POST',
-				  body: formData
-				})
-				.then(res => res.json())
-				.then(data => {
-				  // data.secure_url is the new image's URL on Cloudinary
-				  if (data.secure_url) {
-					onSuccess(data.secure_url);
-				  } else {
-					onError(data);
-				  }
-				})
-				.catch(err => onError(err));
-			  }
+			function dataURLtoBlob(dataURL) {
+				var byteString = atob(dataURL.split(',')[1]);
+				var mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+				var ab = new ArrayBuffer(byteString.length);
+				var ia = new Uint8Array(ab);
+				for (var i = 0; i < byteString.length; i++) {
+					ia[i] = byteString.charCodeAt(i);
+				}
+				return new Blob([ab], { type: mimeString });
+			}
+
+			function dataURLtoBytes(dataURL) {
+				var base64String = dataURL.split(',')[1];
+				var padding = (base64String.endsWith('==') ? 2 : (base64String.endsWith('=') ? 1 : 0));
+				var base64Length = base64String.length;
+				var inBytes = Math.ceil(base64Length * 3 / 4) - padding;
+				return inBytes;
+			}
 
             // Only allow uploads if a cube is actually open (i.e. details page is showing).
             if (!self.isOpen || self.isAnimating) {
@@ -422,7 +413,7 @@
                 reader.onload = function(ev) {
 					var originalDataURL = ev.target.result;
 					// Compress the image (quality: 0.8, max dimensions: 1024x1024)
-					compressImage(originalDataURL, 0.8, 1024, 1024, function(compressedDataURL) {
+					compressImageToWebp(originalDataURL, 0.8, 1024, 1024, function(compressedDataURL) {
 						var estimatedSize = dataURLtoBytes(compressedDataURL);
 						var MAX_COMPRESSED_SIZE = 8 * 1024 * 1024; // 8MB limit
 						if (estimatedSize > MAX_COMPRESSED_SIZE) {
@@ -432,6 +423,7 @@
 						}
 
 						var dataURL = compressedDataURL;
+
 
 						// Create (or get existing) progress bar element
 						var progressContainer = document.getElementById('upload-progress-container');
@@ -458,14 +450,21 @@
 							progressBar = document.getElementById('upload-progress-bar');
 						}
 
+						// =======================
+						// SINGLE UPLOAD TO CLOUDINARY
+						// =======================
+						// Convert the compressed data URL to a Blob
+						var webpBlob = dataURLtoBlob(dataURL);
+
 						// Show the progress bar
 						progressContainer.style.display = 'block';
 						progressBar.style.width = '0%';
 
+						// Prepare XHR to Cloudinary
 						var xhr = new XMLHttpRequest();
-						xhr.open('POST', '/.netlify/functions/upload');
-						xhr.setRequestHeader('Content-Type', 'application/json');
-						
+						xhr.open('POST', 'https://api.cloudinary.com/v1_1/dyupj51le/image/upload');
+
+						// Track progress
 						xhr.upload.onprogress = function(event) {
 							if (event.lengthComputable) {
 								var percentComplete = (event.loaded / event.total) * 100;
@@ -473,84 +472,57 @@
 							}
 						};
 
+						// On load
 						xhr.onload = function() {
-							// Hide progress bar after a short delay
+						// Hide progress bar after a short delay
 							setTimeout(function() {
 								progressContainer.style.display = 'none';
 							}, 500);
 
 							if (xhr.status >= 200 && xhr.status < 300) {
 								var data = JSON.parse(xhr.responseText);
-								if (data.imageUrl) {
-								// Update the centralized mapping on the server
-								fetch('/.netlify/functions/updateCube', {
-								    method: 'POST',
-								    headers: { 'Content-Type': 'application/json' },
-								    body: JSON.stringify({ day: self.currentDayIdx, imageUrl: data.imageUrl })
-								}).then(res => {
-								    if (!res.ok) {
-								        console.error('Failed to update the backend mapping.');
-								    }
-								}).catch(err => console.error('Error updating the backend mapping:', err));
+								if (data.secure_url) {
+								// Update the background of the current cube with the new image
+								currentDay.cube.querySelectorAll('.cube__side').forEach(function(side) {
+									side.style.backgroundImage = `url(${data.secure_url})`;
+								});
 
-									// Update the background of the current cube with the new image
-									currentDay.cube.querySelectorAll('.cube__side').forEach(function(side) {
-										side.style.backgroundImage = `url(${data.imageUrl})`;
-									});
-
-									// Adjust the emoji positioning if an image exists
-									var emojiEl = currentDay.cube.querySelector('.cube__emoji');
-									if (emojiEl) {
-										emojiEl.style.left = 'unset';
-										emojiEl.style.right = '10px';
-										emojiEl.style.top = 'unset';
-										emojiEl.style.bottom = '5px';
-										emojiEl.style.transform = 'translateX(0) translateY(0)';
-										emojiEl.style.fontSize = '16px';
-										emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
-									}
-									alert('Upload successful!');
-								} else {
-									console.error('Upload failed, no imageUrl returned:', data);
-									alert('Sorry, the upload failed. Please try again.');
-								}
-							} else {
-								alert('Upload failed with status ' + xhr.status);
+							// Adjust the emoji positioning if an image exists
+							var emojiEl = currentDay.cube.querySelector('.cube__emoji');
+							if (emojiEl) {
+								emojiEl.style.left = 'unset';
+								emojiEl.style.right = '10px';
+								emojiEl.style.top = 'unset';
+								emojiEl.style.bottom = '5px';
+								emojiEl.style.transform = 'translateX(0) translateY(0)';
+								emojiEl.style.fontSize = '16px';
+								emojiEl.style.textShadow = '1px 1px 2px #2b2b2b';
 							}
+							alert('Upload successful!');
+							} else {
+							console.error('Upload failed, no secure_url returned:', data);
+							alert('Sorry, the upload failed. Please try again.');
+							}
+						} else {
+							alert('Upload failed with status ' + xhr.status);
+						}
 						};
 
+						// On error
 						xhr.onerror = function() {
-							alert('An error occurred while uploading. Please try again.');
+						alert('An error occurred while uploading to Cloudinary. Please try again.');
 						};
 
-						xhr.send(JSON.stringify({ imageData: dataURL }));
+						// Build the FormData
+						var formData = new FormData();
+						formData.append('file', webpBlob);
+						formData.append('upload_preset', 'fridaypreset');  // Your unsigned preset
+						formData.append('public_id', `custom${self.currentDayIdx}`);
+						xhr.send(formData);
 						fileInput.value = '';
 					});
-					function dataURLtoBytes(dataURL) {
-						var base64String = dataURL.split(',')[1];
-						var padding = (base64String.endsWith('==') ? 2 : (base64String.endsWith('=') ? 1 : 0));
-						var base64Length = base64String.length;
-						var inBytes = Math.ceil(base64Length * 3 / 4) - padding;
-						return inBytes;
-					}
 				};
 				reader.readAsDataURL(file);
-
-				uploadToCloudinary(file, self.currentDayIdx,
-					function(cloudUrl) {
-					  // 1. Update the cube's background to the known Cloudinary URL
-					  currentDay.cube.querySelectorAll('.cube__side').forEach(side => {
-						side.style.backgroundImage = `url(${cloudUrl})`;
-					  });
-					  // 2. (Optional) Adjust your emoji position, show an alert, etc.
-					  alert('Upload successful!');
-					},
-					function(error) {
-					  alert('Upload failed: ' + JSON.stringify(error));
-					}
-				  );
-
-
 
 			};
 
