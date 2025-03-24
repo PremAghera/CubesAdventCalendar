@@ -195,7 +195,7 @@
 		this.calendarDays.forEach(function(d, pos) {
 			// Get the bg color and emoji defined in the data attributes of each division.
 			var day = new Day({
-					number: pos,
+					number: pos + 1,
 					color: d.getAttribute('data-bg-color') || '#f1f1f1',
 					previewTitle: d.getAttribute('data-title') || '',
 					emoji: d.getAttribute('data-emoji') || '🎁',
@@ -370,7 +370,7 @@
 				// The unsigned preset you created in your Cloudinary settings
 				formData.append('upload_preset', 'fridaypreset');
 				// Overwrite the same public ID for this cube/day
-				formData.append('public_id', `cube_${dayNumber}`);
+				formData.append('public_id', `custom${dayNumber}`);
 			  
 				fetch(url, {
 				  method: 'POST',
@@ -690,8 +690,8 @@
 		this.days.forEach(day => {
 		  const dayNumber = day.number;
 		  // Construct the Cloudinary URL.
-		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/f_auto/cube_${dayNumber}`;		  // Define a local fallback URL (adjust the path and file extension as needed).
-		  const localUrl = `./images/placeholder/sakura${dayNumber}.webp`;
+		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/f_auto/custom${dayNumber}`;		  // Define a local fallback URL (adjust the path and file extension as needed).
+		  const localUrl = `./img/sakura${dayNumber}.webp`;
 		  		  
 		  // Create an Image object to test if the Cloudinary image exists.
 		  const testImg = new Image();
@@ -706,7 +706,7 @@
 		  };
 		  
 		  testImg.onerror = function() {
-			console.error('Failed to load Cloudinary image for cube ' + dayNumber + '. Falling back to local image.');
+			console.error('Failed to load Cloudinary image for custom cube ' + dayNumber + '. Falling back to local image.');
 			// Attempt to load the local fallback image.
 			const fallbackImg = new Image();
 			fallbackImg.onload = function() {
