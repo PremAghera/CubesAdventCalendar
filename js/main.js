@@ -195,7 +195,7 @@
 		this.calendarDays.forEach(function(d, pos) {
 			// Get the bg color and emoji defined in the data attributes of each division.
 			var day = new Day({
-					number: pos + 1,
+					number: pos,
 					color: d.getAttribute('data-bg-color') || '#f1f1f1',
 					previewTitle: d.getAttribute('data-title') || '',
 					emoji: d.getAttribute('data-emoji') || '🎁',
