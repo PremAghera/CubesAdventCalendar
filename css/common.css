@@ -473,7 +473,7 @@ main {
 
 .js .content__block {
 	padding: 20vh 5vw;
-	position: absolute;
+	position: fixed;
 	z-index: 100;
 	display: -webkit-flex;
 	display: -ms-flexbox;
