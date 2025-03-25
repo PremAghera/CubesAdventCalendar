@@ -759,6 +759,7 @@
 			title = content.querySelector('.content__title'),
 			description = content.querySelector('.content__description'),
 			meta = content.querySelector('.content__meta');
+		var iframe = content.querySelector('iframe');
 
 		content.classList.add('content__block--current');
 
@@ -791,6 +792,17 @@
 			opacity: [0,1],
 			translateY: [50,0]
 		});
+		
+		if (iframe) {
+		    anime({
+		        targets: iframe,
+		        duration: 800,
+		        delay: 1000,
+		        easing: 'easeOutExpo',
+		        opacity: [0, 1],
+		        translateY: [100, 0]
+		    });
+		}
 
 		contentNumber.innerHTML = this.currentDayIdx + 1;
 		anime({
@@ -1036,7 +1048,11 @@
 			});
 		}
 		
-		// Reset logic: clicking the Friday 2025 title 5 times resets the app
+	// Reset logic: clicking the Friday 2025 title 5 times resets the app
+	
+	/* Add the following CSS rule to your stylesheet to ensure the iframe starts hidden:
+	   iframe { opacity: 0; transform: translateY(100px); transition: opacity 0.3s ease, transform 0.3s ease; }
+	*/
 		let resetTapCount = 0;
 		let resetTapTimeout = null;
 		const fridayTitleEl = document.querySelector('.friday-title');
