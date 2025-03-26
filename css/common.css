@@ -418,7 +418,6 @@ main {
     right: 8vw;
     margin: 0;
     white-space: nowrap;
-    pointer-events: none;
     opacity: 1;
     z-index: 999;
 }
@@ -457,10 +456,12 @@ main {
 	position: absolute;
 	top: 0;
 	left: 0;
-	overflow: hidden;
+	overflow-y: auto;
 	width: 100%;
 	height: 100%;
 	pointer-events: none;
+	max-height: 100vh;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 
@@ -468,22 +469,20 @@ main {
 
 .content__block {
 	padding: 10vh 5vw;
-	overflow: scroll !important;
 }
 
 .js .content__block {
 	padding: 20vh 5vw;
-	position: fixed;
+	position: absolute;
 	z-index: 100;
 	display: -webkit-flex;
 	display: -ms-flexbox;
 	display: flex;
 	-webkit-flex-direction: column;
+	justify-content: flex-start;
 	-ms-flex-direction: column;
 	flex-direction: column;
-	-webkit-justify-content: center;
 	-ms-flex-pack: center;
-	justify-content: center;
 	width: 85%;
 	height: 100%;
 	padding: 3em 0 6em 7vw;
@@ -493,11 +492,18 @@ main {
 	user-select: none;
 	-webkit-touch-callout: none;
 	-khtml-user-select: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	pointer-events: none;
+	height: 0;
+	overflow: hidden;
 }
 
 .content__title {
 	font-size: 5vw;
-	margin: 35vw 0 0 0;
+	margin: 5vw 0 0 0;
 }
 
 .content__description {
@@ -562,8 +568,10 @@ main {
 }
 
 .js .content__block--current {
-	pointer-events: auto;
 	opacity: 1;
+	pointer-events: auto;
+	height: auto;
+	overflow: visible;
 }
 
 /* Responsive YouTube iframe wrapper */
@@ -647,7 +655,7 @@ main {
 	}
 	.content__title {
 		font-size: 7vw;
-		margin: 20vw 0 0 0 !important;
+		margin: 17vw 0 0 0 !important;
 	}
 	.content__description {
 		font-size: 1.15em;
