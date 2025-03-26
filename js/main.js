@@ -517,7 +517,7 @@
 						var formData = new FormData();
 						formData.append('file', webpBlob);
 						formData.append('upload_preset', 'fridaypreset');  // Your unsigned preset
-						formData.append('public_id', `customcube${self.currentDayIdx}`);
+						formData.append('public_id', `customcubes${self.currentDayIdx}`);
 						xhr.send(formData);
 						fileInput.value = '';
 					});
@@ -662,7 +662,7 @@
 		this.days.forEach(day => {
 		  const dayNumber = day.number;
 		  // Construct the Cloudinary URL.
-		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/customcube${dayNumber}.webp`;		  // Define a local fallback URL (adjust the path and file extension as needed).
+		  const cloudUrl = `https://res.cloudinary.com/dyupj51le/image/upload/customcubes${dayNumber}.webp`;		  // Define a local fallback URL (adjust the path and file extension as needed).
 		  const localUrl = `./img/sakura${dayNumber}.webp`;
 		  		  
 		  // Create an Image object to test if the Cloudinary image exists.
