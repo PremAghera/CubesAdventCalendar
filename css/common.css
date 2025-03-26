@@ -507,9 +507,9 @@ main {
 }
 
 .content__description {
-	font-size: 2vw;
+	font-size: 1.7vw;
 	margin: 1em 0;
-	padding: 0 0 0 5vw;
+	padding: 0 0 0 10vw;
 }
 
 .content__meta {
@@ -572,6 +572,7 @@ main {
 	pointer-events: auto;
 	height: auto;
 	overflow: visible;
+	-webkit-overflow-scrolling: touch;
 }
 
 /* Responsive YouTube iframe wrapper */
