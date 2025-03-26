@@ -570,8 +570,11 @@ main {
 .js .content__block--current {
 	opacity: 1;
 	pointer-events: auto;
-	height: auto;
-	overflow: visible;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 }
 
@@ -656,7 +659,7 @@ main {
 	}
 	.content__title {
 		font-size: 7vw;
-		margin: 17vw 0 0 0 !important;
+		margin: 35vw 0 0 0 !important;
 	}
 	.content__description {
 		font-size: 1.15em;
