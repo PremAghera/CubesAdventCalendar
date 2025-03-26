@@ -585,7 +585,7 @@ main {
     width: 55%;
 	height: 60%;
 	height: auto;
-    margin: 2em auto 0 auto;
+    margin: 2em 2em 0 auto;
     padding-bottom: 56.25%; /* 16:9 aspect ratio */
     height: 0;
 }
@@ -683,6 +683,7 @@ main {
 	.video-wrapper {
 		width: 75%;
 		height: auto;
+		margin: 2em 1em 0 auto;
 	}
 	.video-wrapper iframe {
 		height: auto !important;
