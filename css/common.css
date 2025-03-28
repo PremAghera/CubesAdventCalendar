@@ -601,6 +601,14 @@ main {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
+.video-wrapper {
+    transition: opacity 0.8s ease;
+}
+
+.video-wrapper iframe {
+    transition: none;
+}
+
 @media screen and (max-width: 768px) {
     .cubes {
         display: grid;
@@ -705,4 +713,9 @@ main {
 		margin: 0;
 		padding: 0.5em 1em;
 	}
+}
+
+.video-wrapper.fade-out {
+    opacity: 0 !important;
+    transition: opacity 0.8s ease;
 }

@@ -860,7 +860,19 @@
 			opacity: [1,0],
 			translateY: [0,200]
 		});
-
+		
+		// Animate the iframe (video) fade-out if present
+		var iframe = content.querySelector('iframe');
+		if (iframe) {
+			anime({
+				targets: iframe,
+				duration: 800,
+				easing: 'easeInExpo',
+				opacity: [1, 0],
+				translateY: [0, 100]
+			});
+		}
+		
 		// The content title animation.
 		day.titlefx.hide(day.titlefxSettings, function() {
 			content.classList.remove('content__block--current');
